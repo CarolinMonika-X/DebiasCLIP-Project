@@ -8,7 +8,7 @@ from model import DebiasCLIP
 # --- Configuration ---
 BATCH_SIZE = 8
 LEARNING_RATE = 1e-4
-NUM_EPOCHS = 5
+NUM_EPOCHS = 1   # Training mudinja aprm, ippo 1 ku maathi test pannunga
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 
@@ -49,6 +49,8 @@ def fairness_loss(logits, demographic_labels):
 
 # --- Training Loop ---
 print("Starting training...")
+best_val_loss = float('inf')  # Best model-a track panna
+
 for epoch in range(NUM_EPOCHS):
     model.train()
     total_loss = 0
@@ -64,7 +66,7 @@ for epoch in range(NUM_EPOCHS):
         
         cls_loss = criterion(logits, labels)
         fair_loss = fairness_loss(logits, demographics)
-        loss = cls_loss + 0.1 * fair_loss
+        loss = cls_loss + 0.0 * fair_loss
         
         loss.backward()
         optimizer.step()
@@ -80,13 +82,26 @@ for epoch in range(NUM_EPOCHS):
     # --- Validation Loop ---
     model.eval()
     val_loss = 0
+    val_fair_loss = 0
     with torch.no_grad():
         for images, texts, labels, demographics in val_loader:
             images, labels, demographics = images.to(DEVICE), labels.to(DEVICE), demographics.to(DEVICE)
             logits = model(images, texts)
             loss = criterion(logits, labels)
+            fair_loss = fairness_loss(logits, demographics)
             val_loss += loss.item()
+            val_fair_loss += fair_loss.item()
     
-    print(f"Validation Loss: {val_loss / len(val_loader):.4f}")
+    avg_val_loss = val_loss / len(val_loader)
+    avg_val_fair_loss = val_fair_loss / len(val_loader)
+    print(f"Validation Loss: {avg_val_loss:.4f}, Validation Fairness Loss: {avg_val_fair_loss:.4f}")
+
+    # --- Model Save Pannunga (Best Model) ---
+    if avg_val_loss < best_val_loss:
+        best_val_loss = avg_val_loss
+        torch.save(model.adapter.state_dict(), "debiasclip_adapter.pth")
+        print(f"✅ Best model saved! (Val Loss: {avg_val_loss:.4f})")
 
 print("Training complete! 🎉")
+print(f"Best Validation Loss: {best_val_loss:.4f}")
+print("Model saved to 'debiasclip_adapter.pth'")
