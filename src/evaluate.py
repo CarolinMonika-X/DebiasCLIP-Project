@@ -12,7 +12,7 @@ import open_clip
 # 2 = Adapter-only (No fairness loss) (Baseline)
 # 3 = DebiasCLIP (Trained with fairness loss)
 # ==========================================================
-EVALUATION_MODE = 3   # <--- Ippo DebiasCLIP (Fair Model) ku run pannuvom
+EVALUATION_MODE = 3   # <--- Ippo pudhu model (v2) ku run pannuvom
 # ==========================================================
 
 BATCH_SIZE = 8
@@ -36,12 +36,13 @@ elif EVALUATION_MODE == 2:
         print("ERROR: 'adapter_baseline.pth' file illa. Mudhalla baseline train pannunga.")
     
 elif EVALUATION_MODE == 3:
-    print(">>> MODE 3: DebiasCLIP (Trained with Fairness Loss) <<<")
+    print(">>> MODE 3: DebiasCLIP (Pudhu 10-Epoch Model) <<<")
     try:
-        model.adapter.load_state_dict(torch.load("debiasclip_adapter_fair.pth", map_location=DEVICE))
-        print("Loaded debiasclip_adapter_fair.pth successfully.")
+        # Ippo pudhu model (v2) load pannuvom
+        model.adapter.load_state_dict(torch.load("debiasclip_adapter_v2.pth", map_location=DEVICE))
+        print("Loaded debiasclip_adapter_v2.pth successfully.")
     except FileNotFoundError:
-        print("ERROR: 'debiasclip_adapter_fair.pth' file illa. Mudhalla fair model train pannunga.")
+        print("ERROR: 'debiasclip_adapter_v2.pth' file illa. Mudhalla model train pannunga.")
 
 print("Model loaded successfully!")
 

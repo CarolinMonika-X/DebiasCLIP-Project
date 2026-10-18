@@ -7,8 +7,8 @@ from model import DebiasCLIP
 
 # --- Configuration ---
 BATCH_SIZE = 8
-LEARNING_RATE = 1e-4
-NUM_EPOCHS = 1   # Training mudinja aprm, ippo 1 ku maathi test pannunga
+LEARNING_RATE = 5e-4
+NUM_EPOCHS = 10   # Training mudinja aprm, ippo 1 ku maathi test pannunga
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 
@@ -66,7 +66,7 @@ for epoch in range(NUM_EPOCHS):
         
         cls_loss = criterion(logits, labels)
         fair_loss = fairness_loss(logits, demographics)
-        loss = cls_loss + 0.0 * fair_loss
+        loss = cls_loss + 0.1 * fair_loss
         
         loss.backward()
         optimizer.step()
