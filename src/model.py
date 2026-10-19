@@ -17,14 +17,13 @@ class DebiasCLIP(nn.Module):
             param.requires_grad = False
             
         # 3. Get the embedding dimension
-        # CLIP ViT-B-32 usually has an embedding dim of 512
         embedding_dim = self.clip_model.text_projection.shape[1]
         print(f"CLIP embedding dimension: {embedding_dim}")
         
-        # 4. Define the trainable adapter (A small MLP)
-        # This is the ONLY part that will be trained.
+        # 4. Define the trainable adapter (Dual-Modal)
+        # Input is now 1024 (512 image + 512 text)
         self.adapter = nn.Sequential(
-            nn.Linear(embedding_dim, 256),
+            nn.Linear(embedding_dim * 2, 256), # 512 * 2 = 1024
             nn.ReLU(),
             nn.Dropout(0.2),
             nn.Linear(256, 1) # Single output for binary classification
@@ -44,10 +43,11 @@ class DebiasCLIP(nn.Module):
             image_features = image_features / image_features.norm(dim=-1, keepdim=True)
             text_features = text_features / text_features.norm(dim=-1, keepdim=True)
         
-        # For simplicity, we use only image features for the adapter.
-        # You can experiment with concatenating image + text features later.
+        # --- Dual-Modal Implementation ---
+        # Combine image and text features along the feature dimension
+        combined_features = torch.cat([image_features, text_features], dim=-1)
         
-        # Pass the image features through our trainable adapter
-        logits = self.adapter(image_features)
+        # Pass the combined features through our trainable adapter
+        logits = self.adapter(combined_features)
         
         return logits.squeeze(-1) # Remove the last dimension

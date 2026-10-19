@@ -10,9 +10,9 @@ import open_clip
 # EVALUATION MODE SETUP
 # 1 = Zero-shot CLIP (Baseline)
 # 2 = Adapter-only (No fairness loss) (Baseline)
-# 3 = DebiasCLIP (Trained with fairness loss)
+# 3 = DebiasCLIP V3 (Dual-Modal + Residual)
 # ==========================================================
-EVALUATION_MODE = 3   # <--- Ippo pudhu model (v2) ku run pannuvom
+EVALUATION_MODE = 3   
 # ==========================================================
 
 BATCH_SIZE = 8
@@ -33,16 +33,16 @@ elif EVALUATION_MODE == 2:
         model.adapter.load_state_dict(torch.load("adapter_baseline.pth", map_location=DEVICE))
         print("Loaded adapter_baseline.pth successfully.")
     except FileNotFoundError:
-        print("ERROR: 'adapter_baseline.pth' file illa. Mudhalla baseline train pannunga.")
+        print("ERROR: 'adapter_baseline.pth' file illa.")
     
 elif EVALUATION_MODE == 3:
-    print(">>> MODE 3: DebiasCLIP (Pudhu 10-Epoch Model) <<<")
+    print(">>> MODE 3: DebiasCLIP V3 (Dual-Modal Model) <<<")
     try:
-        # Ippo pudhu model (v2) load pannuvom
-        model.adapter.load_state_dict(torch.load("debiasclip_adapter_v2.pth", map_location=DEVICE))
-        print("Loaded debiasclip_adapter_v2.pth successfully.")
+        # Ippo pudhu V3 model load pannuvom
+        model.adapter.load_state_dict(torch.load("debiasclip_adapter_v3.pth", map_location=DEVICE))
+        print("Loaded debiasclip_adapter_v3.pth successfully.")
     except FileNotFoundError:
-        print("ERROR: 'debiasclip_adapter_v2.pth' file illa. Mudhalla model train pannunga.")
+        print("ERROR: 'debiasclip_adapter_v3.pth' file illa. Mudhalla V3 model train pannunga.")
 
 print("Model loaded successfully!")
 
@@ -66,7 +66,6 @@ with torch.no_grad():
     for images, texts, labels, demographics in test_loader:
         images = images.to(DEVICE)
         
-        # --- Zero-shot CLIP Bypass ---
         if EVALUATION_MODE == 1:
             image_features = model.clip_model.encode_image(images)
             text_tokens = open_clip.tokenize(texts).to(DEVICE)
@@ -78,7 +77,6 @@ with torch.no_grad():
             logits = (image_features * text_features).sum(dim=-1) * 100
         
         else:
-            # --- Normal Forward Pass (Adapter Use Aagum) ---
             logits = model(images, texts)
             
         probs = torch.sigmoid(logits).cpu().numpy()

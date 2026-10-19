@@ -33,3 +33,20 @@
 | Zero-shot CLIP | 0.5355 | 0.4988 | 0.0000 | 0.0000 |
 | Adapter-only | 0.5935 | 0.6382 | 0.1473 | 0.1609 |
 | **DebiasCLIP (Ours)** | **0.6575** | **0.7233** | **0.0808** | **0.0936** |
+
+
+
+# DebiasCLIP Final Results
+
+| Method | Accuracy | AUC | DPD | EOD |
+| :--- | :--- | :--- | :--- | :--- |
+| Zero-shot CLIP | 0.5355 | 0.4988 | N/A | N/A |
+| Adapter-only | 0.5935 | 0.6382 | 0.1473 | 0.1609 |
+| DebiasCLIP V2 (Image-only) | 0.6575 | 0.7233 | 0.0808 | 0.0936 |
+| **DebiasCLIP V3 (Dual-Modal)** | **0.7330** | **0.8098** | **0.0720** | **0.0759** |
+
+**Key Achievements:**
+- Accuracy improved from 59.35% (baseline) to 73.30%.
+- AUC improved from 0.6382 (baseline) to 0.8098.
+- DPD reduced by 51.1% (0.1473 -> 0.0720).
+- EOD reduced by 52.8% (0.1609 -> 0.0759).
