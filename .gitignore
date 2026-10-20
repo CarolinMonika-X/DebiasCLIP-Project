@@ -25,3 +25,6 @@ Thumbs.db
 
 # Environment Variables
 .env
+# PyTorch Models & Cache
+*.pth
+*.pt
