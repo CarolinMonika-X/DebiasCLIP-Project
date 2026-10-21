@@ -10,7 +10,7 @@ import open_clip
 # EVALUATION MODE SETUP
 # 1 = Zero-shot CLIP (Baseline)
 # 2 = Adapter-only (No fairness loss) (Baseline)
-# 3 = DebiasCLIP V3 (Dual-Modal + Residual)
+# 3 = DebiasCLIP V4 (Dual-Modal + Residual)
 # ==========================================================
 EVALUATION_MODE = 3   
 # ==========================================================
@@ -36,13 +36,13 @@ elif EVALUATION_MODE == 2:
         print("ERROR: 'adapter_baseline.pth' file illa.")
     
 elif EVALUATION_MODE == 3:
-    print(">>> MODE 3: DebiasCLIP V3 (Dual-Modal Model) <<<")
+    print(">>> MODE 3: DebiasCLIP V4 (Dual-Modal Model) <<<")
     try:
-        # Ippo pudhu V3 model load pannuvom
-        model.adapter.load_state_dict(torch.load("debiasclip_adapter_v3.pth", map_location=DEVICE))
-        print("Loaded debiasclip_adapter_v3.pth successfully.")
+        # Ippo pudhu V4 model load pannuvom
+        model.adapter.load_state_dict(torch.load("debiasclip_adapter_v4.pth", map_location=DEVICE))
+        print("Loaded debiasclip_adapter_v4.pth successfully.")
     except FileNotFoundError:
-        print("ERROR: 'debiasclip_adapter_v3.pth' file illa. Mudhalla V3 model train pannunga.")
+        print("ERROR: 'debiasclip_adapter_v4.pth' file illa. Mudhalla V4 model train pannunga.")
 
 print("Model loaded successfully!")
 

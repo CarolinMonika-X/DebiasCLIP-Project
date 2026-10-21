@@ -8,7 +8,7 @@ from model import DebiasCLIP
 # --- Configuration ---
 BATCH_SIZE = 8
 LEARNING_RATE = 5e-4
-NUM_EPOCHS = 10   # Training mudinja aprm, ippo 1 ku maathi test pannunga
+NUM_EPOCHS = 15  # Training mudinja aprm, ippo 1 ku maathi test pannunga
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 

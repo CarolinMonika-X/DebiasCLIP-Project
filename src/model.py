@@ -20,14 +20,18 @@ class DebiasCLIP(nn.Module):
         embedding_dim = self.clip_model.text_projection.shape[1]
         print(f"CLIP embedding dimension: {embedding_dim}")
         
-        # 4. Define the trainable adapter (Dual-Modal)
+        # 4. Define the UPGRADED trainable adapter (Dual-Modal)
         # Input is now 1024 (512 image + 512 text)
         self.adapter = nn.Sequential(
-            nn.Linear(embedding_dim * 2, 256), # 512 * 2 = 1024
+            nn.Linear(embedding_dim * 2, 512),   # Increased from 256 to 512
+            nn.LayerNorm(512),                   # Added LayerNorm for stability
             nn.ReLU(),
-            nn.Dropout(0.2),
-            nn.Linear(256, 1) # Single output for binary classification
+            nn.Dropout(0.3),                     # Increased dropout to prevent overfitting
+            nn.Linear(512, 1)                    # Single output for binary classification
         )
+        
+        # 5. Learnable residual weight (Like CLIP-Adapter)
+        self.alpha = nn.Parameter(torch.tensor(0.1))
 
     def forward(self, images, texts):
         # Get image and text features from the frozen CLIP model
@@ -48,6 +52,10 @@ class DebiasCLIP(nn.Module):
         combined_features = torch.cat([image_features, text_features], dim=-1)
         
         # Pass the combined features through our trainable adapter
-        logits = self.adapter(combined_features)
+        adapter_out = self.adapter(combined_features)
+        
+        # Residual Connection: Add a small portion of the image feature mean to the logits
+        # This helps the model retain CLIP's original knowledge
+        logits = adapter_out + self.alpha * image_features.mean(dim=-1, keepdim=True)
         
         return logits.squeeze(-1) # Remove the last dimension

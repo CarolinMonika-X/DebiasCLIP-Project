@@ -50,3 +50,13 @@
 - AUC improved from 0.6382 (baseline) to 0.8098.
 - DPD reduced by 51.1% (0.1473 -> 0.0720).
 - EOD reduced by 52.8% (0.1609 -> 0.0759).
+
+# Novelty: Modality-Specific Debiasing Strategy
+
+| Strategy | Accuracy | AUC | DPD (↓) | EOD (↓) |
+| :--- | :--- | :--- | :--- | :--- |
+| Standard (Baseline) | 70.10% | 0.7826 | 0.1804 | 0.1193 |
+| Down-weight Image (α=0.5) | **70.95%** | **0.7869** | **0.1522** | **0.1001** |
+| Down-weight Image (α=0.1) | 68.75% | 0.7742 | **0.1219** | 0.1303 |
+
+**Key Finding:** Down-weighting the biased image features by α=0.5 reduces DPD by **15.6%** and EOD by **16.1%**, while improving accuracy.
