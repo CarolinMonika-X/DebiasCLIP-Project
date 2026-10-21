@@ -60,3 +60,30 @@
 | Down-weight Image (α=0.1) | 68.75% | 0.7742 | **0.1219** | 0.1303 |
 
 **Key Finding:** Down-weighting the biased image features by α=0.5 reduces DPD by **15.6%** and EOD by **16.1%**, while improving accuracy.
+##s.
+CLIP embedding dimension: 512
+>>> MODE 3: DebiasCLIP V4 (Dual-Modal Model) <<<
+Loaded debiasclip_adapter_v4.pth successfully.
+Model loaded successfully!
+Test size: 2000
+Evaluating... (Idhu konjam neram aagum)
+
+--- Overall Results (Threshold = 0.5) ---
+Accuracy: 0.7710
+AUC: 0.8588
+
+--- Optimal Threshold Results ---
+Best Threshold: 0.50
+Best Accuracy: 0.7710 (Improved from 0.7710)
+
+--- Per Group Results (Optimal Threshold = 0.50) ---
+Group 0: Accuracy=0.7862, AUC=0.8370, Positive Rate=0.6478
+Group 1: Accuracy=0.8019, AUC=0.8668, Positive Rate=0.6645
+Group 2: Accuracy=0.7631, AUC=0.8623, Positive Rate=0.5949
+
+Demographic Parity Difference (DPD): 0.0696
+
+--- EOD Calculation (using Optimal Threshold) ---
+FPR Gap: 0.0560
+TPR Gap (Equal Opportunity Difference): 0.0489
+Equalized Odds Difference (EOD): 0.0560

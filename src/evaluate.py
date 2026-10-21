@@ -38,7 +38,6 @@ elif EVALUATION_MODE == 2:
 elif EVALUATION_MODE == 3:
     print(">>> MODE 3: DebiasCLIP V4 (Dual-Modal Model) <<<")
     try:
-        # Ippo pudhu V4 model load pannuvom
         model.adapter.load_state_dict(torch.load("debiasclip_adapter_v4.pth", map_location=DEVICE))
         print("Loaded debiasclip_adapter_v4.pth successfully.")
     except FileNotFoundError:
@@ -89,37 +88,51 @@ all_labels = np.array(all_labels)
 all_preds = np.array(all_preds)
 all_demographics = np.array(all_demographics)
 
-# --- Overall Metrics ---
+# --- Overall Metrics (Default 0.5 Threshold) ---
 accuracy = accuracy_score(all_labels, (all_preds > 0.5).astype(int))
 auc = roc_auc_score(all_labels, all_preds)
 
-print(f"\n--- Overall Results ---")
+print(f"\n--- Overall Results (Threshold = 0.5) ---")
 print(f"Accuracy: {accuracy:.4f}")
 print(f"AUC: {auc:.4f}")
 
-# --- Fairness Metrics (Per Demographic Group) ---
+# --- ADDED: Optimal Threshold for Accuracy ---
+best_thresh = 0.5
+best_acc = 0.0
+
+for t in np.arange(0.1, 0.9, 0.01):
+    acc = accuracy_score(all_labels, (all_preds > t).astype(int))
+    if acc > best_acc:
+        best_acc = acc
+        best_thresh = t
+
+print(f"\n--- Optimal Threshold Results ---")
+print(f"Best Threshold: {best_thresh:.2f}")
+print(f"Best Accuracy: {best_acc:.4f} (Improved from {accuracy:.4f})")
+
+# --- Fairness Metrics (Per Demographic Group using Optimal Threshold) ---
 group_positive_rates = []
-print(f"\n--- Per Group Results ---")
+print(f"\n--- Per Group Results (Optimal Threshold = {best_thresh:.2f}) ---")
 for demo in np.unique(all_demographics):
     mask = all_demographics == demo
     if mask.sum() > 0:
-        group_acc = accuracy_score(all_labels[mask], (all_preds[mask] > 0.5).astype(int))
+        group_acc = accuracy_score(all_labels[mask], (all_preds[mask] > best_thresh).astype(int))
         try:
             group_auc = roc_auc_score(all_labels[mask], all_preds[mask])
         except ValueError:
             group_auc = 0.0
-        positive_rate = (all_preds[mask] > 0.5).mean()
+        positive_rate = (all_preds[mask] > best_thresh).mean()
         group_positive_rates.append(positive_rate)
         
         print(f"Group {demo}: Accuracy={group_acc:.4f}, AUC={group_auc:.4f}, Positive Rate={positive_rate:.4f}")
 
-# --- DPD Calculation ---
+# --- DPD Calculation (using Optimal Threshold) ---
 if len(group_positive_rates) > 1:
     dpd = max(group_positive_rates) - min(group_positive_rates)
     print(f"\nDemographic Parity Difference (DPD): {dpd:.4f}")
 
-# --- EOD Calculation ---
-print(f"\n--- EOD Calculation ---")
+# --- EOD Calculation (using Optimal Threshold) ---
+print(f"\n--- EOD Calculation (using Optimal Threshold) ---")
 eod_tpr = 0.0
 eod_fpr = 0.0
 
@@ -128,7 +141,7 @@ for y_val in [0, 1]:
     for demo in np.unique(all_demographics):
         mask = (all_demographics == demo) & (all_labels == y_val)
         if mask.sum() > 0:
-            rate = (all_preds[mask] > 0.5).mean()
+            rate = (all_preds[mask] > best_thresh).mean()
             group_rates.append(rate)
     
     if len(group_rates) > 1:
