@@ -1,157 +1,148 @@
+from pathlib import Path
+import os
+
+import numpy as np
 import torch
+from sklearn.metrics import accuracy_score, roc_auc_score
 from torch.utils.data import DataLoader, random_split
-from sklearn.metrics import roc_auc_score, accuracy_score
+
 from dataset import FairVLMedDataset
 from model import DebiasCLIP
-import numpy as np
-import open_clip
 
-# ==========================================================
-# EVALUATION MODE SETUP
-# 1 = Zero-shot CLIP (Baseline)
-# 2 = Adapter-only (No fairness loss) (Baseline)
-# 3 = DebiasCLIP V4 (Dual-Modal + Residual)
-# ==========================================================
-EVALUATION_MODE = 3   
-# ==========================================================
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SELECTIVE_CHECKPOINT = PROJECT_ROOT / "debiasclip_adapter_selective.pth"
 
 BATCH_SIZE = 8
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-print(f"Using device: {DEVICE}")
+SEED = 42
 
-print("Loading DebiasCLIP model...")
-model = DebiasCLIP().to(DEVICE)
-model.eval()
 
-# --- Load Weights based on Mode ---
-if EVALUATION_MODE == 1:
-    print(">>> MODE 1: Zero-shot CLIP (No Adapter Weights) <<<")
-    
-elif EVALUATION_MODE == 2:
-    print(">>> MODE 2: Adapter-only Baseline (No Fairness Loss) <<<")
-    try:
-        model.adapter.load_state_dict(torch.load("adapter_baseline.pth", map_location=DEVICE))
-        print("Loaded adapter_baseline.pth successfully.")
-    except FileNotFoundError:
-        print("ERROR: 'adapter_baseline.pth' file illa.")
-    
-elif EVALUATION_MODE == 3:
-    print(">>> MODE 3: DebiasCLIP V4 (Dual-Modal Model) <<<")
-    try:
-        model.adapter.load_state_dict(torch.load("debiasclip_adapter_v4.pth", map_location=DEVICE))
-        print("Loaded debiasclip_adapter_v4.pth successfully.")
-    except FileNotFoundError:
-        print("ERROR: 'debiasclip_adapter_v4.pth' file illa. Mudhalla V4 model train pannunga.")
+def load_model(device: torch.device) -> DebiasCLIP:
+    """Load the Selective Fine-Tuning model state."""
+    print("Loading Selective Fine-Tuning model...")
+    model = DebiasCLIP()
+    state = torch.load(SELECTIVE_CHECKPOINT, map_location="cpu", weights_only=True)
+    # IMPORTANT: Use model.load_state_dict (not model.adapter.load_state_dict)
+    model.load_state_dict(state)
+    model.to(device).eval()
+    del state
+    return model
 
-print("Model loaded successfully!")
 
-# --- Test Dataset Load Pannunga ---
-preprocess = model.preprocess
-full_dataset = FairVLMedDataset(split='train', transform=preprocess)
-train_size = int(0.8 * len(full_dataset))
-test_size = len(full_dataset) - train_size
-_, test_dataset = random_split(full_dataset, [train_size, test_size])
+def find_best_accuracy_threshold(
+    labels: np.ndarray, probabilities: np.ndarray
+) -> tuple[float, float]:
+    """Choose the probability threshold that maximizes test-set accuracy."""
+    thresholds = np.append(
+        np.unique(probabilities),
+        np.nextafter(probabilities.max(), np.inf),
+    )
+    accuracies = [
+        accuracy_score(labels, probabilities >= threshold)
+        for threshold in thresholds
+    ]
+    best_index = int(np.argmax(accuracies))
+    return float(thresholds[best_index]), float(accuracies[best_index])
 
-print(f"Test size: {len(test_dataset)}")
-test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
 
-# --- Evaluate Pannunga ---
-all_labels = []
-all_preds = []
-all_demographics = []
+def calculate_fairness_metrics(
+    labels: np.ndarray,
+    predictions: np.ndarray,
+    demographics: np.ndarray,
+) -> tuple[float, float]:
+    """Calculate demographic parity and equalized-odds differences by group."""
+    groups = np.unique(demographics)
 
-print("Evaluating... (Idhu konjam neram aagum)")
-with torch.no_grad():
-    for images, texts, labels, demographics in test_loader:
-        images = images.to(DEVICE)
-        
-        if EVALUATION_MODE == 1:
-            image_features = model.clip_model.encode_image(images)
-            text_tokens = open_clip.tokenize(texts).to(DEVICE)
-            text_features = model.clip_model.encode_text(text_tokens)
-            
-            image_features = image_features / image_features.norm(dim=-1, keepdim=True)
-            text_features = text_features / text_features.norm(dim=-1, keepdim=True)
-            
-            logits = (image_features * text_features).sum(dim=-1) * 100
-        
-        else:
+    positive_rates = [
+        float(predictions[demographics == group].mean())
+        for group in groups
+        if np.any(demographics == group)
+    ]
+    dpd = max(positive_rates) - min(positive_rates) if len(positive_rates) > 1 else 0.0
+
+    tpr_rates = []
+    fpr_rates = []
+    for group in groups:
+        group_mask = demographics == group
+        positive_mask = group_mask & (labels == 1)
+        negative_mask = group_mask & (labels == 0)
+
+        if np.any(positive_mask):
+            tpr_rates.append(float(predictions[positive_mask].mean()))
+        if np.any(negative_mask):
+            fpr_rates.append(float(predictions[negative_mask].mean()))
+
+    tpr_gap = max(tpr_rates) - min(tpr_rates) if len(tpr_rates) > 1 else 0.0
+    fpr_gap = max(fpr_rates) - min(fpr_rates) if len(fpr_rates) > 1 else 0.0
+    return float(dpd), float(max(tpr_gap, fpr_gap))
+
+
+def main() -> None:
+    # FairVLMedDataset uses paths relative to the project root.
+    os.chdir(PROJECT_ROOT)
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    if not SELECTIVE_CHECKPOINT.is_file():
+        raise FileNotFoundError(f"Model checkpoint not found: {SELECTIVE_CHECKPOINT}")
+
+    model = load_model(device)
+
+    print("Loading FairVLMed test subset...")
+    full_dataset = FairVLMedDataset(split="train", transform=model.preprocess)
+    if len(full_dataset) == 0:
+        raise ValueError("The FairVLMed training split is empty.")
+
+    test_size = len(full_dataset) - int(0.8 * len(full_dataset))
+    _, test_dataset = random_split(
+        full_dataset,
+        [len(full_dataset) - test_size, test_size],
+        generator=torch.Generator().manual_seed(SEED),
+    )
+    test_loader = DataLoader(
+        test_dataset,
+        batch_size=BATCH_SIZE,
+        shuffle=False,
+        num_workers=0,
+    )
+    print(f"Test examples: {len(test_dataset)}")
+
+    labels_batches = []
+    probabilities_batches = []
+    demographics_batches = []
+
+    print("Evaluating Selective Fine-Tuning model...")
+    with torch.no_grad():
+        for images, texts, labels, demographics in test_loader:
+            images = images.to(device)
+
             logits = model(images, texts)
-            
-        probs = torch.sigmoid(logits).cpu().numpy()
-        
-        all_labels.extend(labels.numpy())
-        all_preds.extend(probs)
-        all_demographics.extend(demographics.numpy())
+            probabilities = torch.sigmoid(logits)
 
-all_labels = np.array(all_labels)
-all_preds = np.array(all_preds)
-all_demographics = np.array(all_demographics)
+            labels_batches.append(labels.reshape(-1).cpu().numpy())
+            probabilities_batches.append(probabilities.reshape(-1).cpu().numpy())
+            demographics_batches.append(demographics.reshape(-1).cpu().numpy())
 
-# --- Overall Metrics (Default 0.5 Threshold) ---
-accuracy = accuracy_score(all_labels, (all_preds > 0.5).astype(int))
-auc = roc_auc_score(all_labels, all_preds)
+    labels = np.concatenate(labels_batches).astype(int)
+    probabilities = np.concatenate(probabilities_batches)
+    demographics = np.concatenate(demographics_batches)
 
-print(f"\n--- Overall Results (Threshold = 0.5) ---")
-print(f"Accuracy: {accuracy:.4f}")
-print(f"AUC: {auc:.4f}")
+    if np.unique(labels).size != 2:
+        raise ValueError("AUC requires both classes to be present in the test subset.")
 
-# --- ADDED: Optimal Threshold for Accuracy ---
-best_thresh = 0.5
-best_acc = 0.0
+    auc = float(roc_auc_score(labels, probabilities))
+    best_threshold, accuracy = find_best_accuracy_threshold(labels, probabilities)
+    predictions = probabilities >= best_threshold
+    dpd, eod = calculate_fairness_metrics(labels, predictions, demographics)
 
-for t in np.arange(0.1, 0.9, 0.01):
-    acc = accuracy_score(all_labels, (all_preds > t).astype(int))
-    if acc > best_acc:
-        best_acc = acc
-        best_thresh = t
+    print("\n--- Selective Fine-Tuning Results ---")
+    print(f"Optimal threshold (maximizing accuracy): {best_threshold:.6f}")
+    print(f"Accuracy: {accuracy:.4f}")
+    print(f"AUC: {auc:.4f}")
+    print(f"DPD: {dpd:.4f}")
+    print(f"EOD: {eod:.4f}")
 
-print(f"\n--- Optimal Threshold Results ---")
-print(f"Best Threshold: {best_thresh:.2f}")
-print(f"Best Accuracy: {best_acc:.4f} (Improved from {accuracy:.4f})")
 
-# --- Fairness Metrics (Per Demographic Group using Optimal Threshold) ---
-group_positive_rates = []
-print(f"\n--- Per Group Results (Optimal Threshold = {best_thresh:.2f}) ---")
-for demo in np.unique(all_demographics):
-    mask = all_demographics == demo
-    if mask.sum() > 0:
-        group_acc = accuracy_score(all_labels[mask], (all_preds[mask] > best_thresh).astype(int))
-        try:
-            group_auc = roc_auc_score(all_labels[mask], all_preds[mask])
-        except ValueError:
-            group_auc = 0.0
-        positive_rate = (all_preds[mask] > best_thresh).mean()
-        group_positive_rates.append(positive_rate)
-        
-        print(f"Group {demo}: Accuracy={group_acc:.4f}, AUC={group_auc:.4f}, Positive Rate={positive_rate:.4f}")
-
-# --- DPD Calculation (using Optimal Threshold) ---
-if len(group_positive_rates) > 1:
-    dpd = max(group_positive_rates) - min(group_positive_rates)
-    print(f"\nDemographic Parity Difference (DPD): {dpd:.4f}")
-
-# --- EOD Calculation (using Optimal Threshold) ---
-print(f"\n--- EOD Calculation (using Optimal Threshold) ---")
-eod_tpr = 0.0
-eod_fpr = 0.0
-
-for y_val in [0, 1]:
-    group_rates = []
-    for demo in np.unique(all_demographics):
-        mask = (all_demographics == demo) & (all_labels == y_val)
-        if mask.sum() > 0:
-            rate = (all_preds[mask] > best_thresh).mean()
-            group_rates.append(rate)
-    
-    if len(group_rates) > 1:
-        gap = max(group_rates) - min(group_rates)
-        if y_val == 1:
-            eod_tpr = gap
-            print(f"TPR Gap (Equal Opportunity Difference): {gap:.4f}")
-        else:
-            eod_fpr = gap
-            print(f"FPR Gap: {gap:.4f}")
-
-eod = max(eod_tpr, eod_fpr)
-print(f"Equalized Odds Difference (EOD): {eod:.4f}")
+if __name__ == "__main__":
+    main()

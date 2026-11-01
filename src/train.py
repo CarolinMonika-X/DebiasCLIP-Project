@@ -7,17 +7,17 @@ from model import DebiasCLIP
 
 # --- Configuration ---
 BATCH_SIZE = 8
-LEARNING_RATE = 5e-4
-NUM_EPOCHS = 15  # Training mudinja aprm, ippo 1 ku maathi test pannunga
+LEARNING_RATE = 1e-4  # Lower LR for selective fine-tuning
+NUM_EPOCHS = 10       
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 print(f"Using device: {DEVICE}")
 
 # --- Model Load Pannunga ---
-print("Loading DebiasCLIP model...")
+print("Loading DebiasCLIP model with Selective Fine-Tuning...")
 model = DebiasCLIP().to(DEVICE)
 preprocess = model.preprocess
 
-# --- Dataset Load Pannunga ---
+# --- Dataset Load Pannunga (80/20 Split) ---
 print("Loading dataset...")
 full_dataset = FairVLMedDataset(split='train', transform=preprocess)
 
@@ -32,7 +32,8 @@ train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, nu
 val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
 
 # --- Optimizer and Loss ---
-optimizer = AdamW(model.adapter.parameters(), lr=LEARNING_RATE)
+# IMPORTANT: Use model.parameters() to train unfrozen CLIP blocks + Adapter
+optimizer = AdamW(model.parameters(), lr=LEARNING_RATE)
 criterion = torch.nn.BCEWithLogitsLoss()
 
 def fairness_loss(logits, demographic_labels):
@@ -48,8 +49,8 @@ def fairness_loss(logits, demographic_labels):
     return preds_tensor.var()
 
 # --- Training Loop ---
-print("Starting training...")
-best_val_loss = float('inf')  # Best model-a track panna
+print("Starting training with Selective Fine-Tuning...")
+best_val_loss = float('inf')
 
 for epoch in range(NUM_EPOCHS):
     model.train()
@@ -82,26 +83,23 @@ for epoch in range(NUM_EPOCHS):
     # --- Validation Loop ---
     model.eval()
     val_loss = 0
-    val_fair_loss = 0
     with torch.no_grad():
         for images, texts, labels, demographics in val_loader:
             images, labels, demographics = images.to(DEVICE), labels.to(DEVICE), demographics.to(DEVICE)
             logits = model(images, texts)
             loss = criterion(logits, labels)
-            fair_loss = fairness_loss(logits, demographics)
             val_loss += loss.item()
-            val_fair_loss += fair_loss.item()
     
     avg_val_loss = val_loss / len(val_loader)
-    avg_val_fair_loss = val_fair_loss / len(val_loader)
-    print(f"Validation Loss: {avg_val_loss:.4f}, Validation Fairness Loss: {avg_val_fair_loss:.4f}")
+    print(f"Validation Loss: {avg_val_loss:.4f}")
 
-    # --- Model Save Pannunga (Best Model) ---
+    # --- Save Best Model (Selective Fine-Tuning + Adapter) ---
     if avg_val_loss < best_val_loss:
         best_val_loss = avg_val_loss
-        torch.save(model.adapter.state_dict(), "debiasclip_adapter.pth")
+        # Save the whole model state (includes CLIP blocks + Adapter)
+        torch.save(model.state_dict(), "debiasclip_adapter_selective.pth")
         print(f"✅ Best model saved! (Val Loss: {avg_val_loss:.4f})")
 
 print("Training complete! 🎉")
 print(f"Best Validation Loss: {best_val_loss:.4f}")
-print("Model saved to 'debiasclip_adapter.pth'")
+print("Model saved to 'debiasclip_adapter_selective.pth'")
