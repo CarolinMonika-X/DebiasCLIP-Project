@@ -1,0 +1,44 @@
+Selected tuned-head configuration:
+{
+  "best_epoch": 5,
+  "dropout": 0.5,
+  "hidden": 128,
+  "lr": 0.0003,
+  "seed": 42,
+  "validation_accuracy": 0.749,
+  "validation_auc": 0.8311137844611527,
+  "weight_decay": 0.001
+}
+Tuned head seed 0: best_epoch=5, validation_loss=0.5231327415
+Tuned head seed 1: best_epoch=5, validation_loss=0.5152825117
+Tuned head seed 2: best_epoch=5, validation_loss=0.5191099644
+Tuned head seed 3: best_epoch=5, validation_loss=0.5165254474
+Tuned head seed 4: best_epoch=6, validation_loss=0.5191876888
+Validation ensemble accuracy at 0.5: 0.7460000000
+Validation-selected threshold: 0.5732758641
+Validation ensemble accuracy at selected threshold: 0.7660000000
+Model C seed 0: best_epoch=2, validation_loss=0.5349332094
+Model C seed 1: best_epoch=3, validation_loss=0.5256581306
+Model C seed 2: best_epoch=1, validation_loss=0.5386949182
+Model C seed 3: best_epoch=3, validation_loss=0.5356680751
+Model C seed 4: best_epoch=2, validation_loss=0.5424885154
+Test examples: 2000
+Tuned head test metrics at threshold 0.5:
+accuracy: 0.7295000000
+auc: 0.8102986763
+dpd: 0.1434421411
+eod: 0.1082721175
+worst_group_auc: 0.7877937047
+Tuned head test metrics at validation-selected threshold 0.5732758641:
+accuracy: 0.7365000000
+auc: 0.8102986763
+dpd: 0.1316666014
+eod: 0.0828276376
+worst_group_auc: 0.7877937047
+AUC difference against retrained model C (tuned head minus model C):
+Tuned-head test AUC: 0.8102986763
+Model C test AUC: 0.8120606855
+Observed AUC difference: -0.0017620092
+Bootstrap resamples: 1000
+Bootstrap mean AUC difference: -0.0017948908
+Bootstrap 95% CI: [-0.0057651670, 0.0021318699]
