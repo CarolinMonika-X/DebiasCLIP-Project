@@ -2,6 +2,17 @@ import torch
 import torch.nn as nn
 import open_clip
 
+
+def build_adapter(embedding_dim=512):
+    return nn.Sequential(
+        nn.Linear(embedding_dim * 2, 512),
+        nn.LayerNorm(512),
+        nn.ReLU(),
+        nn.Dropout(0.3),
+        nn.Linear(512, 1),
+    )
+
+
 class DebiasCLIP(nn.Module):
     def __init__(self, clip_model_name='ViT-B-32', pretrained='laion2b_s34b_b79k'):
         super().__init__()
@@ -39,13 +50,7 @@ class DebiasCLIP(nn.Module):
         print(f"CLIP embedding dimension: {embedding_dim}")
         
         # 5. Define the trainable adapter (Dual-Modal)
-        self.adapter = nn.Sequential(
-            nn.Linear(embedding_dim * 2, 512),   
-            nn.LayerNorm(512),                   
-            nn.ReLU(),
-            nn.Dropout(0.3),                     
-            nn.Linear(512, 1)                    
-        )
+        self.adapter = build_adapter(embedding_dim)
         
         # 6. Learnable residual weight
         self.alpha = nn.Parameter(torch.tensor(0.1))

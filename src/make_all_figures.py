@@ -2,16 +2,16 @@
 make_all_figures.py - every figure and table for the paper/slides, from saved result files.
 
 Inputs (project root):
-  ablation_results.json          written by ablation_full.py  (required)
+  ablation_results.json          written by ablation_full.py (required)
   novelty_results_alpha.json     OPTIONAL, exploratory figure (see schema below)
 Outputs: ./figures/*.png, results_table.md, results_table.tex
 
-Run:  python src/make_all_figures.py
-      python src/make_all_figures.py --results other.json --out my_figs
+Run: python src/make_all_figures.py
+     python src/make_all_figures.py --results other.json --out my_figs
 
 Optional exploratory file schema (values are [mean, std] or a single number):
   {"configs": {"Baseline (alpha=1)": {"acc": [0.70, 0.01], "auc": [..], "dpd": [..], "eod": [..]},
-               "Image x0.5":         {...}}}
+               "Image x0.5": {...}}}
 Without that file the exploratory figure is skipped; nothing is hard-coded.
 """
 import argparse, json, sys
@@ -42,7 +42,7 @@ KEYS = list(AB)
 
 LAB = ["A\nImage", "B\nImage +\nparity", "C\nImage + text", "D\nDual +\nparity", "E\nDual +\nlabel-cond"]
 COL = ["#4C72B0", "#8FA9D0", "#DD8452", "#E8B38B", "#55A868"]
-GREY, PREV_GAP = "#9a9a9a", 0.216   # PREV_GAP = DPD of a perfect classifier (test prevalence 0.450/0.666/0.484)
+GREY, PREV_GAP = "#9a9a9a", 0.216  # PREV_GAP = DPD of a perfect classifier (test prevalence 0.450/0.666/0.484)
 
 plt.rcParams.update({"font.size": 10.5, "axes.spines.top": False, "axes.spines.right": False,
                      "axes.grid": True, "grid.alpha": 0.25, "axes.axisbelow": True, "axes.titleweight": "bold"})
@@ -85,7 +85,7 @@ if AB:
 
 # ---------------- bootstrap forest ----------------
 if BT:
-    keys = list(BT); names = [k.split("  (")[0] for k in keys]; y = np.arange(len(keys))[::-1]
+    keys = list(BT); names = [k.split(" (")[0] for k in keys]; y = np.arange(len(keys))[::-1]
     fig, axs = plt.subplots(1, 4, figsize=(14, 3.8), sharey=True)
     for ax, (k, t) in zip(axs, [("auc", "ΔAUC"), ("w_auc", "ΔWorst-group AUC"), ("dpd", "ΔDPD"), ("eod", "ΔEOD")]):
         for yi, key in zip(y, keys):
@@ -112,18 +112,20 @@ if SW:
             vals = [ms(SW[f"{loss}_lam{l:g}"]["test"][m]) for l in L]; xs = np.arange(len(L))
             ax.errorbar(xs + (0.04 if loss == "labelcond" else -0.04), [v[0] for v in vals],
                         yerr=[v[1] or 0 for v in vals], marker="o", capsize=3, color=c, label=lab)
-            ax.set_xticks(xs); ax.set_xticklabels([f"{l:g}" for l in L])
+        ax.set_xticks(xs); ax.set_xticklabels([f"{l:g}" for l in L])
         ax.set_xlabel("λ"); ax.set_title(t, fontsize=10.5)
         if m == "dpd": ax.axhline(PREV_GAP, color="black", ls="--", lw=1); ax.text(0.05, PREV_GAP + .004, "perfect classifier 0.216", fontsize=8)
     axs[0].legend(fontsize=8)
     fig.suptitle("Fairness-loss weight: low DPD/EOD at large λ comes with collapsed AUC", fontweight="bold")
     save(fig, "fig5_lambda_sweep.png")
 
-# ---------------- per-group rates (values copied from the per-group block of final_output.txt) ----------------
+# ---------------- per-group rates (values copied from final_output_v2.txt) ----------------
 N = np.array([169, 302, 1529]); PREV = np.array([.450, .666, .484]); NPOS, NNEG = PREV * N, N * (1 - PREV)
-PG = {"A  Image": [(.461, .183), (.542, .178), (.449, .180)],                      # (TPR, FPR) for groups 0,1,2
-      "C  Image + text": [(.671, .226), (.701, .307), (.673, .248)],
-      "E  Dual + label-cond (λ=1)": [(.671, .247), (.786, .396), (.709, .307)]}
+PG = {
+    "A  Image": [(0.684, 0.269), (0.711, 0.337), (0.685, 0.274)],  # (TPR, FPR) for groups 0, 1, 2
+    "C  Image + text": [(0.750, 0.312), (0.766, 0.366), (0.718, 0.253)],
+    "E  Dual + label-cond (λ=1)": [(0.724, 0.226), (0.761, 0.337), (0.732, 0.257)]
+}
 def wilson(p, n, z=1.96):
     d = 1 + z * z / n; c = (p + z * z / (2 * n)) / d; h = z * np.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
     return c - h, c + h
@@ -142,7 +144,7 @@ save(fig, "fig6_pergroup_rates.png")
 if LK:
     fig, axs = plt.subplots(1, 3, figsize=(11, 3.7))
     for ax, (k, t, ch) in zip(axs, [("glaucoma_auc", "Predicts glaucoma (AUC)", .5), ("race_macro_auc", "Predicts race (macro-AUC)", .5),
-                                   ("race_bal_acc", "Predicts race (balanced acc.)", 1 / 3)]):
+                                    ("race_bal_acc", "Predicts race (balanced acc.)", 1 / 3)]):
         v = [LK["Image"][k], LK["Text"][k]]; b = ax.bar(["Image", "Text"], v, color=[COL[0], COL[2]], width=.55)
         ax.axhline(ch, color="black", ls="--", lw=1); ax.text(1.42, ch, "chance", ha="right", va="bottom", fontsize=8)
         for r, x in zip(b, v): ax.text(r.get_x() + r.get_width() / 2, x + .01, f"{x:.3f}", ha="center", fontsize=9)

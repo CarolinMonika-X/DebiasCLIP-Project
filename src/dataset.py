@@ -1,51 +1,53 @@
-import os
-import torch
-from torch.utils.data import Dataset
-from PIL import Image
+﻿import os
 import numpy as np
+import torch
+from PIL import Image
+from torch.utils.data import Dataset
 from datasets import load_dataset
 
+
 class FairVLMedDataset(Dataset):
-    def __init__(self, split='train', transform=None):
+    FOLDERS = ("Training", "Validation", "Test")
+
+    def __init__(self, split="train", transform=None, root=None, strict=True):
         self.ds = load_dataset("harvardairobotics/FairVLMed", "default", split=split)
         self.transform = transform
-        
-        split_folder_map = {
-            'train': 'Training',
-            'validation': 'Validation',
-            'test': 'Test'
-        }
-        folder_name = split_folder_map.get(split, 'Training')
-        
-        self.data_dir = os.path.join(".", "data", "FairVLMed", "Dataset", "dataset", folder_name)
-
-        self.glaucoma_map = {'no': 0, 'yes': 1}
-        self.race_map = {'asian': 0, 'black': 1, 'white': 2}
-        self.gender_map = {'male': 0, 'female': 1}
+        self.root = root or os.path.join(".", "data", "FairVLMed", "Dataset", "dataset")
+        self.strict = strict
+        self.n_failed = 0
+        self.glaucoma_map = {"no": 0, "yes": 1}
+        self.race_map = {"asian": 0, "black": 1, "white": 2}
 
     def __len__(self):
         return len(self.ds)
 
+    def _find(self, fn):
+        for f in self.FOLDERS:
+            p = os.path.join(self.root, f, fn)
+            if os.path.exists(p):
+                return p
+        raise FileNotFoundError(f"{fn} not found in {self.FOLDERS} under {self.root}")
+
+    def _load_image(self, fn):
+        z = np.load(self._find(fn))
+        key = "slo_fundus" if "slo_fundus" in z.files else ("image" if "image" in z.files else z.files[0])
+        a = z[key]
+        if a.dtype != np.uint8:
+            a = a.astype(np.float32)
+            if a.max() <= 1.0:
+                a = a * 255.0
+            a = np.clip(a, 0, 255).astype(np.uint8)
+        return Image.fromarray(a).convert("RGB")
+
     def __getitem__(self, idx):
         item = self.ds[idx]
-        image_path = os.path.join(self.data_dir, item['filename'])
-        
         try:
-            npz_data = np.load(image_path)
-            if 'slo_fundus' in npz_data.files:
-                image_data = npz_data['slo_fundus']
-            elif 'image' in npz_data.files:
-                image_data = npz_data['image']
-            else:
-                image_data = npz_data[npz_data.files[0]]
-
-            if len(image_data.shape) == 2:
-                image = Image.fromarray(image_data).convert('RGB')
-            else:
-                image = Image.fromarray(image_data)
-                
+            image = self._load_image(item["filename"])
         except Exception as e:
-            image = Image.new('RGB', (224, 224), color='black')
+            if self.strict:
+                raise RuntimeError(f"Could not load image for row {idx} ({item['filename']}): {e}") from e
+            self.n_failed += 1
+            image = Image.new("RGB", (224, 224), color="black")
 
         if self.transform:
             image = self.transform(image)
@@ -53,8 +55,11 @@ class FairVLMedDataset(Dataset):
             image = image.resize((224, 224))
             image = torch.tensor(np.array(image)).permute(2, 0, 1).float() / 255.0
 
-        text = item['gpt4_summary']
-        label = torch.tensor(self.glaucoma_map.get(item['glaucoma'].lower(), 0), dtype=torch.float32)
-        demographic_label = torch.tensor(self.race_map.get(item['race'].lower(), 0), dtype=torch.long)
-        
-        return image, text, label, demographic_label
+        g, r = str(item["glaucoma"]).lower(), str(item["race"]).lower()
+        if g not in self.glaucoma_map:
+            raise KeyError(f"Unknown glaucoma label '{g}' at row {idx}")
+        if r not in self.race_map:
+            raise KeyError(f"Unknown race value '{r}' at row {idx}")
+        label = torch.tensor(self.glaucoma_map[g], dtype=torch.float32)
+        race = torch.tensor(self.race_map[r], dtype=torch.long)
+        return image, item["gpt4_summary"], label, race
