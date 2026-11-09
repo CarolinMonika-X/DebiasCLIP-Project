@@ -28,3 +28,8 @@ Thumbs.db
 # PyTorch Models & Cache
 *.pth
 *.pt
+*_OLD.*
+*_before_*.json
+train_aug_*.txt
+alpha_test_output.txt
+
