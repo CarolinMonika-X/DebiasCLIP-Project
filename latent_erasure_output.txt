@@ -1,0 +1,31 @@
+Loading cached features...
+Fitting Input LEACE on TRAIN...
+
+Extracting latent representations from intermediate hidden layer (dim=512)...
+Fitting Latent-LEACE eraser on hidden representations H['train']...
+
+=== Race Probing on Latent Space (TEST split) ===
+[Raw Hidden H]
+  Linear Probe:  Macro-AUC = 0.6212 | Bal-Acc = 0.3333 (Chance: AUC=0.500, Acc=0.333)
+  MLP Probe:     Macro-AUC = 0.7651 | Bal-Acc = 0.4166
+[Latent-LEACE Erased HL]
+  Linear Probe:  Macro-AUC = 0.5067 | Bal-Acc = 0.3333 (Chance: AUC=0.500, Acc=0.333)
+  MLP Probe:     Macro-AUC = 0.7645 | Bal-Acc = 0.4329
+
+=== Training Final Diagnostic Head on Latent-LEACE (5 seeds) ===
+Latent-LEACE Dual Model (F3) Test Performance:
+  acc     : 0.7342 +/- 0.0012
+  auc     : 0.8049 +/- 0.0001
+  dpd     : 0.1173 +/- 0.0017
+  eod     : 0.1071 +/- 0.0050
+  tpr_gap : 0.0647 +/- 0.0034
+  fpr_gap : 0.1071 +/- 0.0050
+  w_auc   : 0.7661 +/- 0.0002
+
+=== Paired Bootstrap vs Baseline C (1000 resamples, seed 0) ===
+  Δauc    | mean: -0.0088 | 95% CI: [-0.0134, -0.0041] (EXCLUDES 0)
+  Δdpd    | mean: -0.0449 | 95% CI: [-0.0912, +0.0035] (includes 0)
+  Δeod    | mean: -0.0047 | 95% CI: [-0.0813, +0.0741] (includes 0)
+  Δw_auc  | mean: -0.0069 | 95% CI: [-0.0197, +0.0058] (includes 0)
+
+Done. Results saved to latent_erasure_output.txt.
