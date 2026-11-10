@@ -1,0 +1,74 @@
+{
+  "race_auc_method": "StandardScaler + LogisticRegression; C selected by validation macro one-vs-rest AUC; reported on test.",
+  "glaucoma_method": "StandardScaler + two-layer MLP (256 hidden units), five-seed test-probability ensemble.",
+  "glaucoma_threshold": 0.5,
+  "results": [
+    {
+      "modality": "image",
+      "feature_dim": 512,
+      "race_auc_pre_erasure": 0.8881622085767994,
+      "race_auc_post_erasure": 0.49453663847397294,
+      "glaucoma_pre_erasure": {
+        "accuracy": 0.7005,
+        "auc": 0.7635836756822721,
+        "dpd": 0.13862239528064485,
+        "eod": 0.07712482274843452
+      },
+      "glaucoma_post_erasure": {
+        "accuracy": 0.702,
+        "auc": 0.7610719497934904,
+        "dpd": 0.10539206081743019,
+        "eod": 0.03546286187554115
+      },
+      "glaucoma_auc": 0.7610719497934904,
+      "glaucoma_accuracy": 0.702,
+      "dpd": 0.10539206081743019,
+      "eod": 0.03546286187554115
+    },
+    {
+      "modality": "text",
+      "feature_dim": 512,
+      "race_auc_pre_erasure": 0.680157235006479,
+      "race_auc_post_erasure": 0.4878678470001099,
+      "glaucoma_pre_erasure": {
+        "accuracy": 0.685,
+        "auc": 0.7611129616459157,
+        "dpd": 0.13117677024961794,
+        "eod": 0.1255190035132545
+      },
+      "glaucoma_post_erasure": {
+        "accuracy": 0.684,
+        "auc": 0.7569557602147021,
+        "dpd": 0.1027861593322622,
+        "eod": 0.10486532524220166
+      },
+      "glaucoma_auc": 0.7569557602147021,
+      "glaucoma_accuracy": 0.684,
+      "dpd": 0.1027861593322622,
+      "eod": 0.10486532524220166
+    },
+    {
+      "modality": "joint",
+      "feature_dim": 1024,
+      "race_auc_pre_erasure": 0.8876569925026058,
+      "race_auc_post_erasure": 0.5446032470109045,
+      "glaucoma_pre_erasure": {
+        "accuracy": 0.7345,
+        "auc": 0.8140982744013019,
+        "dpd": 0.15174967671146994,
+        "eod": 0.1512828702225061
+      },
+      "glaucoma_post_erasure": {
+        "accuracy": 0.7295,
+        "auc": 0.8097690232477186,
+        "dpd": 0.10940867588855363,
+        "eod": 0.10092622165442353
+      },
+      "glaucoma_auc": 0.8097690232477186,
+      "glaucoma_accuracy": 0.7295,
+      "dpd": 0.10940867588855363,
+      "eod": 0.10092622165442353
+    }
+  ],
+  "markdown_table": "| Modality | Pre-Erasure Race AUC | Post-Erasure Race AUC | Glaucoma AUC | Glaucoma Acc | DPD | EOD |\n| --- | --- | --- | --- | --- | --- | --- |\n| image | 0.8882 | 0.4945 | 0.7611 | 0.7020 | 0.1054 | 0.0355 |\n| text | 0.6802 | 0.4879 | 0.7570 | 0.6840 | 0.1028 | 0.1049 |\n| joint | 0.8877 | 0.5446 | 0.8098 | 0.7295 | 0.1094 | 0.1009 |"
+}
