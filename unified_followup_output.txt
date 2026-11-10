@@ -1,0 +1,177 @@
+===================================================================================================================
+HARVARD-FAIRVLMED RIGOROUS FOLLOW-UP BENCHMARK & PLACEBO AUDIT
+Official Split: Train=7000, Val=1000, Test=2000 | OpenCLIP ViT-B/32 (Joint 1024-dim)
+Definitions: EOD_max = max(TPR_gap, FPR_gap), AOD = (TPR_gap + FPR_gap) / 2
+===================================================================================================================
+
+[1/6] Computing Concept Erasure and Placebo Projections...
+
+[2/6] ITEM 1: Investigating Parity Penalty (lam=0.1) vs LEACE Gaps...
+
+Probability Comparison (Parity Penalty vs LEACE on Test Set):
+  Maximum absolute probability difference: 0.596244
+  Mean absolute probability difference:    0.065412
+  --> CONFIRMED: The probabilities are DIFFERENT across models.
+      The equality of ensembled TPR gap (0.0482) and FPR gap (0.0678) in Table 1
+      was an exact empirical coincidence due to identical discrete cell counts at p=0.50 cutoff.
+
+Per-Seed Breakdown of Disparity Gaps across 5 Random Seeds:
+Seed   | Raw Dual (TPR/FPR)     | Parity Penalty (TPR/FPR)   | LEACE Dual (TPR/FPR)  
+----------------------------------------------------------------------------------
+Seed 0 | 0.0282 / 0.1609        | 0.0253 / 0.0731            | 0.0294 / 0.0571       
+Seed 1 | 0.0376 / 0.2276        | 0.0300 / 0.1677            | 0.0336 / 0.0876       
+Seed 2 | 0.0415 / 0.1182        | 0.0535 / 0.0927            | 0.0532 / 0.0760       
+Seed 3 | 0.0528 / 0.1032        | 0.0844 / 0.1272            | 0.0547 / 0.1793       
+Seed 4 | 0.0823 / 0.0980        | 0.0564 / 0.0764            | 0.0535 / 0.1009       
+
+[3/6] ITEM 4: Computing Cross-Fitted Group Thresholds on TRAIN (5-Fold CV)...
+  Target Pooled Train TPR: 0.7632
+  Cross-Fitted Thresholds (Asian, Black, White): {0: np.float64(0.42800000000000005), 1: np.float64(0.514), 2: np.float64(0.502)}
+
+[4/6] ITEM 3: Running Placebo Controls & Probing...
+
+--- Placebo Control Benchmark on Test Set ---
+Method                           | AUC     | DPD     | EOD_max  | Linear Race AUC 
+------------------------------------------------------------------------------
+Raw Dual                         | 0.8005  | 0.1588  | 0.1453   | 0.8930          
+LEACE Race (Proposed)            | 0.8004  | 0.1030  | 0.0678   | 0.4792          
+Placebo: Shuffled 2D Nullspace   | 0.8024  | 0.1347  | 0.0893   | 0.8931          
+Placebo: Gender Erasure          | 0.7998  | 0.1439  | 0.0786   | 0.8930          
+
+[5/6] ITEM 2: Paired Bootstrap (1,000 Resamples, Seed 0) for EVERY Method minus Raw Dual...
+
+=============================================================================================================================
+TABLE: PAIRED BOOTSTRAP DIFFERENCES (METHOD MINUS RAW DUAL)
+Primary Endpoints: Delta AUC (Non-inferiority >= -0.01) and Delta EOD_max
+Secondary Endpoints: Bonferroni Multiplicity-Corrected CI (alpha = 0.05 / 6)
+=============================================================================================================================
+
+>>> Method: Sample Reweighting MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | -0.0063    | [-0.0129, +0.0002]       | [-0.0150, +0.0022]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0073    | [-0.0995, +0.0806]       | [-0.1404, +0.1150]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | 0.0022     | [-0.0558, +0.0625]       | [-0.0822, +0.0768]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0211    | [-0.0786, +0.0276]       | [-0.0962, +0.0463]         | 95%:NO | Bonf:NO
+ACC (Secondary)           | 0.0007     | [-0.0115, +0.0135]       | [-0.0149, +0.0164]         | 95%:NO | Bonf:NO
+TPR_GAP (Secondary)       | 0.0162     | [-0.0481, +0.0858]       | [-0.0725, +0.1054]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0117    | [-0.1056, +0.0796]       | [-0.1435, +0.1175]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | -0.0030    | [-0.0204, +0.0151]       | [-0.0271, +0.0260]         | 95%:NO | Bonf:NO
+
+>>> Method: Parity Penalty (lam=0.1) MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | 0.0015     | [-0.0023, +0.0053]       | [-0.0036, +0.0069]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0469    | [-0.1252, +0.0361]       | [-0.1461, +0.0671]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0256    | [-0.0693, +0.0239]       | [-0.0864, +0.0466]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0113    | [-0.0500, +0.0271]       | [-0.0664, +0.0419]         | 95%:NO | Bonf:NO
+ACC (Secondary)           | 0.0167     | [+0.0070, +0.0280]       | [+0.0025, +0.0308]         | 95%:YES | Bonf:YES
+TPR_GAP (Secondary)       | 0.0081     | [-0.0421, +0.0543]       | [-0.0595, +0.0758]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0594    | [-0.1319, +0.0258]       | [-0.1521, +0.0846]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | 0.0053     | [-0.0109, +0.0182]       | [-0.0182, +0.0211]         | 95%:NO | Bonf:NO
+
+>>> Method: Label-Cond Penalty (lam=5.0) MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | 0.0048     | [-0.0055, +0.0154]       | [-0.0101, +0.0177]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0279    | [-0.1339, +0.0722]       | [-0.1716, +0.1102]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0171    | [-0.0861, +0.0558]       | [-0.1056, +0.0715]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0249    | [-0.0915, +0.0446]       | [-0.1136, +0.0710]         | 95%:NO | Bonf:NO
+ACC (Secondary)           | 0.0112     | [-0.0060, +0.0280]       | [-0.0104, +0.0329]         | 95%:NO | Bonf:NO
+TPR_GAP (Secondary)       | -0.0028    | [-0.0831, +0.0861]       | [-0.1117, +0.1076]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0313    | [-0.1410, +0.0727]       | [-0.1758, +0.1096]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | 0.0146     | [-0.0140, +0.0429]       | [-0.0193, +0.0530]         | 95%:NO | Bonf:NO
+
+>>> Method: Cross-Fitted Thresholds MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | 0.0000     | [+0.0000, +0.0000]       | [+0.0000, +0.0000]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0346    | [-0.0881, +0.0175]       | [-0.1108, +0.0368]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0191    | [-0.0489, +0.0125]       | [-0.0594, +0.0260]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0250    | [-0.0537, -0.0039]       | [-0.0633, +0.0012]         | 95%:YES | Bonf:NO
+ACC (Secondary)           | 0.0014     | [-0.0015, +0.0045]       | [-0.0029, +0.0054]         | 95%:NO | Bonf:NO
+TPR_GAP (Secondary)       | 0.0039     | [-0.0278, +0.0335]       | [-0.0418, +0.0480]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0421    | [-0.0897, +0.0128]       | [-0.1110, +0.0501]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | 0.0000     | [+0.0000, +0.0000]       | [+0.0000, +0.0000]         | 95%:NO | Bonf:NO
+
+>>> Method: INLP (k=2) MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | -0.0002    | [-0.0049, +0.0043]       | [-0.0066, +0.0057]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0600    | [-0.1549, +0.0358]       | [-0.1734, +0.0700]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0378    | [-0.0929, +0.0226]       | [-0.1140, +0.0475]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0417    | [-0.0887, +0.0039]       | [-0.1054, +0.0197]         | 95%:NO | Bonf:NO
+ACC (Secondary)           | 0.0122     | [+0.0010, +0.0240]       | [-0.0020, +0.0284]         | 95%:YES | Bonf:NO
+TPR_GAP (Secondary)       | -0.0045    | [-0.0614, +0.0571]       | [-0.0834, +0.0857]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0711    | [-0.1584, +0.0457]       | [-0.1821, +0.0877]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | -0.0042    | [-0.0188, +0.0120]       | [-0.0241, +0.0240]         | 95%:NO | Bonf:NO
+
+>>> Method: LEACE Race (Joint) MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | -0.0000    | [-0.0057, +0.0057]       | [-0.0083, +0.0079]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0464    | [-0.1329, +0.0471]       | [-0.1518, +0.0729]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0276    | [-0.0806, +0.0293]       | [-0.0973, +0.0496]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0476    | [-0.0953, -0.0021]       | [-0.1122, +0.0133]         | 95%:YES | Bonf:NO
+ACC (Secondary)           | 0.0121     | [+0.0005, +0.0240]       | [-0.0020, +0.0289]         | 95%:YES | Bonf:NO
+TPR_GAP (Secondary)       | 0.0057     | [-0.0631, +0.0836]       | [-0.0845, +0.1098]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0610    | [-0.1366, +0.0248]       | [-0.1535, +0.0572]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | 0.0008     | [-0.0142, +0.0163]       | [-0.0189, +0.0219]         | 95%:NO | Bonf:NO
+
+>>> Method: Placebo (Shuffled 2D) MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | 0.0021     | [-0.0025, +0.0064]       | [-0.0040, +0.0077]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0398    | [-0.1150, +0.0279]       | [-0.1460, +0.0464]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0227    | [-0.0696, +0.0214]       | [-0.0846, +0.0356]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0194    | [-0.0615, +0.0166]       | [-0.0741, +0.0283]         | 95%:NO | Bonf:NO
+ACC (Secondary)           | 0.0176     | [+0.0070, +0.0280]       | [+0.0045, +0.0310]         | 95%:YES | Bonf:YES
+TPR_GAP (Secondary)       | 0.0023     | [-0.0440, +0.0495]       | [-0.0624, +0.0723]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0478    | [-0.1255, +0.0230]       | [-0.1491, +0.0464]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | 0.0028     | [-0.0100, +0.0150]       | [-0.0143, +0.0205]         | 95%:NO | Bonf:NO
+
+>>> Method: Placebo (Gender) MINUS Raw Dual <<<
+Endpoint                  | Mean Diff  | 95% CI                   | Bonferroni CI              | Excludes Zero?
+--------------------------------------------------------------------------------------------------------------
+AUC (PRIMARY)             | -0.0006    | [-0.0047, +0.0033]       | [-0.0065, +0.0046]         | 95%:NO | Bonf:NO
+EOD_MAX (PRIMARY)         | -0.0450    | [-0.1217, +0.0302]       | [-0.1503, +0.0580]         | 95%:NO | Bonf:NO
+AOD (Secondary)           | -0.0260    | [-0.0681, +0.0195]       | [-0.0820, +0.0382]         | 95%:NO | Bonf:NO
+DPD (Secondary)           | -0.0113    | [-0.0488, +0.0240]       | [-0.0660, +0.0338]         | 95%:NO | Bonf:NO
+ACC (Secondary)           | 0.0123     | [+0.0020, +0.0235]       | [-0.0009, +0.0265]         | 95%:YES | Bonf:NO
+TPR_GAP (Secondary)       | 0.0028     | [-0.0482, +0.0506]       | [-0.0652, +0.0752]         | 95%:NO | Bonf:NO
+FPR_GAP (Secondary)       | -0.0549    | [-0.1254, +0.0204]       | [-0.1515, +0.0663]         | 95%:NO | Bonf:NO
+WORST_AUC (Secondary)     | 0.0036     | [-0.0067, +0.0144]       | [-0.0127, +0.0195]         | 95%:NO | Bonf:NO
+
+[6/6] ITEM 5: Per-Group Detailed Clinical Breakdown (FNR, TPR, FPR) with Wilson CIs...
+
+=============================================================================================================================
+TABLE: PER-GROUP CLINICAL ERROR RATES ON OFFICIAL TEST SET (N=2,000)
+=============================================================================================================================
+Group    | Model           | N     | Prev(%) | FNR (Missed)           | TPR (Sensitivity)      | FPR (Over-referral)    | AUC
+-----------------------------------------------------------------------------------------------------------------------------
+Asian    | Raw Dual        | 169   | 45.0  % | 0.184 [0.113,0.286]    | 0.816 [0.714,0.887]    | 0.290 [0.208,0.389]    | 0.8214
+Asian    | INLP (k=2)      | 169   | 45.0  % | 0.237 [0.155,0.344]    | 0.763 [0.656,0.845]    | 0.280 [0.199,0.378]    | 0.8270
+Asian    | LEACE Race      | 169   | 45.0  % | 0.211 [0.134,0.315]    | 0.789 [0.685,0.866]    | 0.269 [0.189,0.367]    | 0.8213
+-----------------------------------------------------------------------------------------------------------------------------
+Black    | Raw Dual        | 302   | 66.6  % | 0.189 [0.141,0.249]    | 0.811 [0.751,0.859]    | 0.436 [0.343,0.533]    | 0.7584
+Black    | INLP (k=2)      | 302   | 66.6  % | 0.254 [0.199,0.318]    | 0.746 [0.682,0.801]    | 0.327 [0.243,0.423]    | 0.7527
+Black    | LEACE Race      | 302   | 66.6  % | 0.259 [0.203,0.323]    | 0.741 [0.677,0.797]    | 0.337 [0.252,0.433]    | 0.7591
+-----------------------------------------------------------------------------------------------------------------------------
+White    | Raw Dual        | 1529  | 48.4  % | 0.224 [0.196,0.256]    | 0.776 [0.744,0.804]    | 0.356 [0.324,0.390]    | 0.8022
+White    | INLP (k=2)      | 1529  | 48.4  % | 0.261 [0.230,0.294]    | 0.739 [0.706,0.770]    | 0.285 [0.255,0.318]    | 0.8032
+White    | LEACE Race      | 1529  | 48.4  % | 0.254 [0.224,0.287]    | 0.746 [0.713,0.776]    | 0.293 [0.262,0.325]    | 0.8039
+-----------------------------------------------------------------------------------------------------------------------------
+
+===================================================================================================================
+TABLE: OPERATING-POINT SENSITIVITY WITH 95% BOOTSTRAP CIS (LEACE MINUS RAW DUAL)
+===================================================================================================================
+Operating Point      | LEACE Cutoff | Raw Cutoff   | Delta AUC (95% CI)         | Delta EOD_max (95% CI)     | Delta DPD (95% CI)        
+-------------------------------------------------------------------------------------------------------------------
+Fixed 0.50           | 0.500        | 0.500        | [-0.0057, +0.0057]         | [-0.1329, +0.0471]         | [-0.0953, -0.0021]        
+Val-Youden           | 0.440        | 0.560        | [-0.0057, +0.0057]         | [-0.0796, +0.0707]         | [-0.0928, -0.0098]        
+Matched Spec=0.80    | 0.736        | 0.776        | [-0.0057, +0.0057]         | [-0.0576, +0.0635]         | [-0.0595, +0.0419]        
+Matched Sens=0.80    | 0.368        | 0.528        | [-0.0057, +0.0057]         | [-0.1048, +0.0400]         | [-0.0792, -0.0036]        
+
+===================================================================================================================
+AUDIT EXECUTION COMPLETE. All results saved to unified_followup_output.txt.
+===================================================================================================================
