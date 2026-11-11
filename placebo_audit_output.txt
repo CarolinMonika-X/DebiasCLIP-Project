@@ -1,0 +1,195 @@
+cache: cached_features.pt | QUICK=False | sizes {'train': 7000, 'val': 1000, 'test': 2000}
+ train: group counts [577, 1030, 5393] | glaucoma rate by group [0.492, 0.647, 0.483]
+ val: group counts [73, 159, 768] | glaucoma rate by group [0.534, 0.635, 0.436]
+ test: group counts [169, 302, 1529] | glaucoma rate by group [0.45, 0.666, 0.484]
+
+=== PART A: raw dual head, 30 seeds (fixed 0.5 cutoff) ===
+ seconds per trained head: 13.7
+ Estimated full runtime: 2.13 hours
+ auc      mean 0.8136 std 0.0012 min 0.8110 max 0.8156
+ acc      mean 0.7333 std 0.0070 min 0.7165 max 0.7430
+ dpd      mean 0.1436 std 0.0196 min 0.0871 max 0.1769
+ eod_max  mean 0.1339 std 0.0338 min 0.0622 max 0.1866
+ disjoint 5-seed ensembles (eod_max, dpd, auc):
+ seeds 0-4: eod_max 0.1258 dpd 0.1717 auc 0.8137
+ seeds 5-9: eod_max 0.1216 dpd 0.1371 auc 0.8148
+ seeds 10-14: eod_max 0.2197 dpd 0.1434 auc 0.8143
+ seeds 15-19: eod_max 0.1323 dpd 0.1456 auc 0.8140
+ seeds 20-24: eod_max 0.1439 dpd 0.1686 auc 0.8146
+ seeds 25-29: eod_max 0.1405 dpd 0.1451 auc 0.8150
+
+=== Training the compared methods (5 seeds each) ===
+ trained: raw, leace, inlp, parity, labelcond, reweight
+ cross-fitting group thresholds on TRAIN (5-fold)...
+ pooled out-of-fold TRAIN TPR at 0.5 = 0.7514; group thresholds = [0.513, 0.446, 0.514]
+
+=== Table 1 (test, fixed 0.5 unless thresholds): PER-SEED mean±std | ENSEMBLE value ===
+ raw         per-seed: auc 0.8131±0.0015 | acc 0.7314±0.0082 | dpd 0.1408±0.0177 | eod_max 0.1113±0.0408
+             ensemble: auc 0.8137 | acc 0.7370 | dpd 0.1717 | tpr_gap 0.0367 | fpr_gap 0.1258 | eod_max 0.1258 | w_auc 0.7739
+ leace       per-seed: auc 0.8106±0.0007 | acc 0.7285±0.0066 | dpd 0.1209±0.0073 | eod_max 0.0932±0.0321
+             ensemble: auc 0.8113 | acc 0.7310 | dpd 0.1288 | tpr_gap 0.0208 | fpr_gap 0.0944 | eod_max 0.0944 | w_auc 0.7702
+ inlp        per-seed: auc 0.8114±0.0015 | acc 0.7303±0.0088 | dpd 0.1475±0.0107 | eod_max 0.1148±0.0342
+             ensemble: auc 0.8123 | acc 0.7335 | dpd 0.1662 | tpr_gap 0.0829 | fpr_gap 0.0961 | eod_max 0.0961 | w_auc 0.7729
+ parity      per-seed: auc 0.8131±0.0008 | acc 0.7310±0.0087 | dpd 0.1457±0.0125 | eod_max 0.1215±0.0346
+             ensemble: auc 0.8138 | acc 0.7360 | dpd 0.1624 | tpr_gap 0.0262 | fpr_gap 0.1159 | eod_max 0.1159 | w_auc 0.7743
+ labelcond   per-seed: auc 0.5069±0.0090 | acc 0.5085±0.0000 | dpd 0.0000±0.0000 | eod_max 0.0000±0.0000
+             ensemble: auc 0.5035 | acc 0.5085 | dpd 0.0000 | tpr_gap 0.0000 | fpr_gap 0.0000 | eod_max 0.0000 | w_auc 0.4957
+ reweight    per-seed: auc 0.7907±0.0015 | acc 0.7149±0.0010 | dpd 0.1406±0.0112 | eod_max 0.1264±0.0154
+             ensemble: auc 0.7919 | acc 0.7160 | dpd 0.1350 | tpr_gap 0.0405 | fpr_gap 0.1315 | eod_max 0.1315 | w_auc 0.7490
+ thresholds  per-seed: auc 0.8131±0.0015 | acc 0.7321±0.0072 | dpd 0.2045±0.0136 | eod_max 0.1816±0.0338
+             ensemble: auc 0.8137 | acc 0.7375 | dpd 0.2140 | tpr_gap 0.0816 | fpr_gap 0.1654 | eod_max 0.1654 | w_auc 0.7739
+
+=== PART B: placebo nulls (50 each, 5-seed ensembles, fixed 0.5) ===
+ placebo 5/50 | 26.6 min elapsed
+ placebo 10/50 | 38.7 min elapsed
+ placebo 15/50 | 50.9 min elapsed
+ placebo 20/50 | 63.0 min elapsed
+ placebo 25/50 | 74.9 min elapsed
+ placebo 30/50 | 87.0 min elapsed
+ placebo 35/50 | 99.7 min elapsed
+ placebo 40/50 | 112.5 min elapsed
+ placebo 45/50 | 129.4 min elapsed
+ placebo 50/50 | 143.3 min elapsed
+ raw dual linear race probe macro-AUC 0.8930 | LEACE-race 0.4962
+ -- shuffled_leace (N=50) vs LEACE-race --
+ auc        null mean 0.8136 std 0.0007 [2.5%,97.5%] [0.8119, 0.8148] | LEACE 0.8113 | percentile rank 0.0%
+ dpd        null mean 0.1655 std 0.0100 [2.5%,97.5%] [0.1457, 0.1836] | LEACE 0.1288 | percentile rank 0.0% | one-sided p (placebo <= LEACE) = 0.0196
+ eod_max    null mean 0.1169 std 0.0140 [2.5%,97.5%] [0.0944, 0.1357] | LEACE 0.0944 | percentile rank 6.0% | one-sided p (placebo <= LEACE) = 0.0784
+ race_probe null mean 0.8927 std 0.0007 [2.5%,97.5%] [0.8912, 0.8937] | LEACE 0.4962 | percentile rank 0.0%
+ -- random_subspace (N=50) vs LEACE-race --
+ auc        null mean 0.8139 std 0.0003 [2.5%,97.5%] [0.8132, 0.8145] | LEACE 0.8113 | percentile rank 0.0%
+ dpd        null mean 0.1689 std 0.0060 [2.5%,97.5%] [0.1598, 0.1816] | LEACE 0.1288 | percentile rank 0.0% | one-sided p (placebo <= LEACE) = 0.0196
+ eod_max    null mean 0.1233 std 0.0088 [2.5%,97.5%] [0.1054, 0.1357] | LEACE 0.0944 | percentile rank 0.0% | one-sided p (placebo <= LEACE) = 0.0196
+ race_probe null mean 0.8931 std 0.0002 [2.5%,97.5%] [0.8928, 0.8934] | LEACE 0.4962 | percentile rank 0.0%
+
+=== PART C: paired bootstrap (1000 resamples, same indices for all) ===
+
+ leace minus raw:
+ [PRIMARY  ] auc      mean -0.0024 | 95% CI [-0.0052, +0.0004] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0232 | 95% CI [-0.0812, +0.0416] includes 0
+ [secondary] acc      mean -0.0059 | 95% CI [-0.0135, +0.0020] includes 0 | Bonferroni CI [-0.0164, +0.0040] includes 0
+ [secondary] dpd      mean -0.0405 | 95% CI [-0.0735, -0.0099] EXCLUDES 0 | Bonferroni CI [-0.0844, -0.0022] EXCLUDES 0
+ [secondary] aod      mean -0.0161 | 95% CI [-0.0643, +0.0328] includes 0 | Bonferroni CI [-0.0768, +0.0466] includes 0
+ [secondary] tpr_gap  mean -0.0053 | 95% CI [-0.0825, +0.0754] includes 0 | Bonferroni CI [-0.1099, +0.0967] includes 0
+ [secondary] fpr_gap  mean -0.0268 | 95% CI [-0.0793, +0.0225] includes 0 | Bonferroni CI [-0.0997, +0.0423] includes 0
+ [secondary] w_auc    mean -0.0031 | 95% CI [-0.0121, +0.0066] includes 0 | Bonferroni CI [-0.0151, +0.0124] includes 0
+
+ leace minus inlp:
+ [PRIMARY  ] auc      mean -0.0010 | 95% CI [-0.0032, +0.0013] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0130 | 95% CI [-0.1029, +0.0528] includes 0
+ [secondary] acc      mean -0.0024 | 95% CI [-0.0100, +0.0045] includes 0 | Bonferroni CI [-0.0133, +0.0070] includes 0
+ [secondary] dpd      mean -0.0348 | 95% CI [-0.0741, +0.0072] includes 0 | Bonferroni CI [-0.0837, +0.0198] includes 0
+ [secondary] aod      mean -0.0162 | 95% CI [-0.0677, +0.0471] includes 0 | Bonferroni CI [-0.0787, +0.0620] includes 0
+ [secondary] tpr_gap  mean -0.0321 | 95% CI [-0.1253, +0.0862] includes 0 | Bonferroni CI [-0.1438, +0.1130] includes 0
+ [secondary] fpr_gap  mean -0.0002 | 95% CI [-0.0454, +0.0441] includes 0 | Bonferroni CI [-0.0657, +0.0579] includes 0
+ [secondary] w_auc    mean -0.0024 | 95% CI [-0.0106, +0.0059] includes 0 | Bonferroni CI [-0.0155, +0.0086] includes 0
+
+ leace minus thresholds:
+ [PRIMARY  ] auc      mean -0.0024 | 95% CI [-0.0052, +0.0004] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0629 | 95% CI [-0.1270, +0.0137] includes 0
+ [secondary] acc      mean -0.0064 | 95% CI [-0.0150, +0.0020] includes 0 | Bonferroni CI [-0.0180, +0.0054] includes 0
+ [secondary] dpd      mean -0.0835 | 95% CI [-0.1221, -0.0519] EXCLUDES 0 | Bonferroni CI [-0.1366, -0.0385] EXCLUDES 0
+ [secondary] aod      mean -0.0487 | 95% CI [-0.1098, +0.0230] includes 0 | Bonferroni CI [-0.1284, +0.0422] includes 0
+ [secondary] tpr_gap  mean -0.0310 | 95% CI [-0.1367, +0.0974] includes 0 | Bonferroni CI [-0.1641, +0.1362] includes 0
+ [secondary] fpr_gap  mean -0.0664 | 95% CI [-0.1248, -0.0144] EXCLUDES 0 | Bonferroni CI [-0.1402, +0.0157] includes 0
+ [secondary] w_auc    mean -0.0031 | 95% CI [-0.0121, +0.0066] includes 0 | Bonferroni CI [-0.0151, +0.0124] includes 0
+
+ leace minus parity:
+ [PRIMARY  ] auc      mean -0.0024 | 95% CI [-0.0052, +0.0004] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0135 | 95% CI [-0.0716, +0.0461] includes 0
+ [secondary] acc      mean -0.0048 | 95% CI [-0.0120, +0.0020] includes 0 | Bonferroni CI [-0.0140, +0.0045] includes 0
+ [secondary] dpd      mean -0.0311 | 95% CI [-0.0665, -0.0007] EXCLUDES 0 | Bonferroni CI [-0.0787, +0.0095] includes 0
+ [secondary] aod      mean -0.0090 | 95% CI [-0.0548, +0.0362] includes 0 | Bonferroni CI [-0.0665, +0.0504] includes 0
+ [secondary] tpr_gap  mean -0.0007 | 95% CI [-0.0728, +0.0705] includes 0 | Bonferroni CI [-0.0955, +0.0975] includes 0
+ [secondary] fpr_gap  mean -0.0172 | 95% CI [-0.0729, +0.0339] includes 0 | Bonferroni CI [-0.0997, +0.0519] includes 0
+ [secondary] w_auc    mean -0.0035 | 95% CI [-0.0129, +0.0065] includes 0 | Bonferroni CI [-0.0162, +0.0125] includes 0
+
+ leace minus labelcond:
+ [PRIMARY  ] auc      mean +0.3083 | 95% CI [+0.2834, +0.3319] EXCLUDES 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean +0.1136 | 95% CI [+0.0388, +0.2169] EXCLUDES 0
+ [secondary] acc      mean +0.2226 | 95% CI [+0.1910, +0.2550] EXCLUDES 0 | Bonferroni CI [+0.1761, +0.2642] EXCLUDES 0
+ [secondary] dpd      mean +0.1314 | 95% CI [+0.0537, +0.2163] EXCLUDES 0 | Bonferroni CI [+0.0340, +0.2524] EXCLUDES 0
+ [secondary] aod      mean +0.0835 | 95% CI [+0.0323, +0.1518] EXCLUDES 0 | Bonferroni CI [+0.0181, +0.1724] EXCLUDES 0
+ [secondary] tpr_gap  mean +0.0636 | 95% CI [+0.0124, +0.1479] EXCLUDES 0 | Bonferroni CI [+0.0062, +0.1853] EXCLUDES 0
+ [secondary] fpr_gap  mean +0.1034 | 95% CI [+0.0193, +0.2148] EXCLUDES 0 | Bonferroni CI [+0.0079, +0.2605] EXCLUDES 0
+ [secondary] w_auc    mean +0.2740 | 95% CI [+0.2155, +0.3221] EXCLUDES 0 | Bonferroni CI [+0.1881, +0.3359] EXCLUDES 0
+
+ leace minus reweight:
+ [PRIMARY  ] auc      mean +0.0196 | 95% CI [+0.0108, +0.0285] EXCLUDES 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0290 | 95% CI [-0.1084, +0.0491] includes 0
+ [secondary] acc      mean +0.0155 | 95% CI [+0.0005, +0.0300] EXCLUDES 0 | Bonferroni CI [-0.0035, +0.0339] includes 0
+ [secondary] dpd      mean -0.0033 | 95% CI [-0.0621, +0.0517] includes 0 | Bonferroni CI [-0.0760, +0.0673] includes 0
+ [secondary] aod      mean -0.0204 | 95% CI [-0.0741, +0.0343] includes 0 | Bonferroni CI [-0.0885, +0.0502] includes 0
+ [secondary] tpr_gap  mean -0.0077 | 95% CI [-0.0758, +0.0685] includes 0 | Bonferroni CI [-0.0934, +0.0941] includes 0
+ [secondary] fpr_gap  mean -0.0331 | 95% CI [-0.1168, +0.0493] includes 0 | Bonferroni CI [-0.1469, +0.0679] includes 0
+ [secondary] w_auc    mean +0.0209 | 95% CI [-0.0041, +0.0460] includes 0 | Bonferroni CI [-0.0139, +0.0568] includes 0
+
+ inlp minus raw:
+ [PRIMARY  ] auc      mean -0.0014 | 95% CI [-0.0033, +0.0006] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0103 | 95% CI [-0.0588, +0.0620] includes 0
+ [secondary] acc      mean -0.0035 | 95% CI [-0.0095, +0.0030] includes 0 | Bonferroni CI [-0.0119, +0.0049] includes 0
+ [secondary] dpd      mean -0.0057 | 95% CI [-0.0359, +0.0241] includes 0 | Bonferroni CI [-0.0461, +0.0334] includes 0
+ [secondary] aod      mean +0.0001 | 95% CI [-0.0353, +0.0320] includes 0 | Bonferroni CI [-0.0463, +0.0427] includes 0
+ [secondary] tpr_gap  mean +0.0268 | 95% CI [-0.0338, +0.0833] includes 0 | Bonferroni CI [-0.0478, +0.0960] includes 0
+ [secondary] fpr_gap  mean -0.0266 | 95% CI [-0.0673, +0.0126] includes 0 | Bonferroni CI [-0.0786, +0.0273] includes 0
+ [secondary] w_auc    mean -0.0007 | 95% CI [-0.0065, +0.0063] includes 0 | Bonferroni CI [-0.0087, +0.0109] includes 0
+
+ parity minus raw:
+ [PRIMARY  ] auc      mean +0.0000 | 95% CI [-0.0005, +0.0005] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean -0.0097 | 95% CI [-0.0351, +0.0093] includes 0
+ [secondary] acc      mean -0.0011 | 95% CI [-0.0045, +0.0020] includes 0 | Bonferroni CI [-0.0055, +0.0030] includes 0
+ [secondary] dpd      mean -0.0094 | 95% CI [-0.0250, +0.0000] includes 0 | Bonferroni CI [-0.0320, +0.0000] includes 0
+ [secondary] aod      mean -0.0071 | 95% CI [-0.0262, +0.0122] includes 0 | Bonferroni CI [-0.0360, +0.0186] includes 0
+ [secondary] tpr_gap  mean -0.0046 | 95% CI [-0.0373, +0.0286] includes 0 | Bonferroni CI [-0.0510, +0.0406] includes 0
+ [secondary] fpr_gap  mean -0.0097 | 95% CI [-0.0341, +0.0078] includes 0 | Bonferroni CI [-0.0430, +0.0141] includes 0
+ [secondary] w_auc    mean +0.0004 | 95% CI [-0.0016, +0.0026] includes 0 | Bonferroni CI [-0.0026, +0.0033] includes 0
+
+ labelcond minus raw:
+ [PRIMARY  ] auc      mean -0.3107 | 95% CI [-0.3339, -0.2863] EXCLUDES 0 | non-inferior (lower 95% bound >= -0.01): False
+ [PRIMARY  ] eod_max  mean -0.1368 | 95% CI [-0.2418, -0.0478] EXCLUDES 0
+ [secondary] acc      mean -0.2285 | 95% CI [-0.2605, -0.1965] EXCLUDES 0 | Bonferroni CI [-0.2689, -0.1804] EXCLUDES 0
+ [secondary] dpd      mean -0.1718 | 95% CI [-0.2576, -0.0862] EXCLUDES 0 | Bonferroni CI [-0.2900, -0.0658] EXCLUDES 0
+ [secondary] aod      mean -0.0996 | 95% CI [-0.1735, -0.0370] EXCLUDES 0 | Bonferroni CI [-0.2040, -0.0221] EXCLUDES 0
+ [secondary] tpr_gap  mean -0.0690 | 95% CI [-0.1633, -0.0116] EXCLUDES 0 | Bonferroni CI [-0.2191, -0.0050] EXCLUDES 0
+ [secondary] fpr_gap  mean -0.1302 | 95% CI [-0.2412, -0.0317] EXCLUDES 0 | Bonferroni CI [-0.2800, -0.0147] EXCLUDES 0
+ [secondary] w_auc    mean -0.2771 | 95% CI [-0.3213, -0.2210] EXCLUDES 0 | Bonferroni CI [-0.3344, -0.1935] EXCLUDES 0
+
+ reweight minus raw:
+ [PRIMARY  ] auc      mean -0.0220 | 95% CI [-0.0309, -0.0131] EXCLUDES 0 | non-inferior (lower 95% bound >= -0.01): False
+ [PRIMARY  ] eod_max  mean +0.0058 | 95% CI [-0.0844, +0.0901] includes 0
+ [secondary] acc      mean -0.0214 | 95% CI [-0.0360, -0.0070] EXCLUDES 0 | Bonferroni CI [-0.0398, -0.0007] EXCLUDES 0
+ [secondary] dpd      mean -0.0371 | 95% CI [-0.0943, +0.0198] includes 0 | Bonferroni CI [-0.1105, +0.0312] includes 0
+ [secondary] aod      mean +0.0044 | 95% CI [-0.0556, +0.0684] includes 0 | Bonferroni CI [-0.0806, +0.0945] includes 0
+ [secondary] tpr_gap  mean +0.0024 | 95% CI [-0.0973, +0.0945] includes 0 | Bonferroni CI [-0.1338, +0.1237] includes 0
+ [secondary] fpr_gap  mean +0.0063 | 95% CI [-0.0727, +0.0859] includes 0 | Bonferroni CI [-0.1011, +0.1166] includes 0
+ [secondary] w_auc    mean -0.0240 | 95% CI [-0.0474, +0.0023] includes 0 | Bonferroni CI [-0.0598, +0.0118] includes 0
+
+ thresholds minus raw:
+ [PRIMARY  ] auc      mean +0.0000 | 95% CI [+0.0000, +0.0000] includes 0 | non-inferior (lower 95% bound >= -0.01): True
+ [PRIMARY  ] eod_max  mean +0.0397 | 95% CI [+0.0041, +0.0833] EXCLUDES 0
+ [secondary] acc      mean +0.0006 | 95% CI [-0.0045, +0.0055] includes 0 | Bonferroni CI [-0.0060, +0.0070] includes 0
+ [secondary] dpd      mean +0.0430 | 95% CI [+0.0203, +0.0680] EXCLUDES 0 | Bonferroni CI [+0.0145, +0.0785] EXCLUDES 0
+ [secondary] aod      mean +0.0326 | 95% CI [-0.0061, +0.0680] includes 0 | Bonferroni CI [-0.0215, +0.0771] includes 0
+ [secondary] tpr_gap  mean +0.0257 | 95% CI [-0.0446, +0.0765] includes 0 | Bonferroni CI [-0.0642, +0.0990] includes 0
+ [secondary] fpr_gap  mean +0.0396 | 95% CI [+0.0088, +0.0834] EXCLUDES 0 | Bonferroni CI [-0.0042, +0.1020] includes 0
+ [secondary] w_auc    mean +0.0000 | 95% CI [+0.0000, +0.0000] includes 0 | Bonferroni CI [+0.0000, +0.0000] includes 0
+
+=== PART D: per-group errors at the stated thresholds (ensemble predictions) with Wilson 95% CIs ===
+ [raw]
+ Asian n= 169 prev=0.450 TPR 0.658 [0.546,0.755] FNR 0.342 [0.245,0.454] FPR 0.161 [0.100,0.249] AUC 0.8257
+ Black n= 302 prev=0.666 TPR 0.692 [0.625,0.751] FNR 0.308 [0.249,0.375] FPR 0.287 [0.208,0.382] AUC 0.7739
+ White n=1529 prev=0.484 TPR 0.695 [0.660,0.727] FNR 0.305 [0.273,0.340] FPR 0.213 [0.186,0.243] AUC 0.8178
+ [leace]
+ Asian n= 169 prev=0.450 TPR 0.697 [0.587,0.789] FNR 0.303 [0.211,0.413] FPR 0.183 [0.117,0.273] AUC 0.8270
+ Black n= 302 prev=0.666 TPR 0.677 [0.609,0.737] FNR 0.323 [0.263,0.391] FPR 0.277 [0.199,0.371] AUC 0.7702
+ White n=1529 prev=0.484 TPR 0.696 [0.662,0.728] FNR 0.304 [0.272,0.338] FPR 0.228 [0.200,0.259] AUC 0.8173
+ [inlp]
+ Asian n= 169 prev=0.450 TPR 0.618 [0.506,0.719] FNR 0.382 [0.281,0.494] FPR 0.161 [0.100,0.249] AUC 0.8274
+ Black n= 302 prev=0.666 TPR 0.672 [0.604,0.733] FNR 0.328 [0.267,0.396] FPR 0.257 [0.182,0.350] AUC 0.7729
+ White n=1529 prev=0.484 TPR 0.701 [0.667,0.733] FNR 0.299 [0.267,0.333] FPR 0.223 [0.195,0.253] AUC 0.8180
+ [thresholds]
+ Asian n= 169 prev=0.450 TPR 0.645 [0.533,0.743] FNR 0.355 [0.257,0.467] FPR 0.161 [0.100,0.249] AUC 0.8257
+ Black n= 302 prev=0.666 TPR 0.726 [0.661,0.783] FNR 0.274 [0.217,0.339] FPR 0.327 [0.243,0.423] AUC 0.7739
+ White n=1529 prev=0.484 TPR 0.684 [0.649,0.716] FNR 0.316 [0.284,0.351] FPR 0.204 [0.177,0.234] AUC 0.8178
+
+Saved placebo_audit_output.txt and placebo_audit_results.json | total 148.1 min

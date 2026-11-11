@@ -1,0 +1,49 @@
+official split sizes: {'train': 7000, 'val': 1000, 'test': 2000, 'missing': 0}
+
+=== column 'gpt4_summary': notes containing a race/ethnicity word ===
+ train: 568/7000 = 8.1%
+ val  : 72/1000 = 7.2%
+ test : 172/2000 = 8.6%
+ Asian: 40/819 = 4.9%
+ Black: 156/1491 = 10.5%
+ White: 616/7690 = 8.0%
+ example matched sentences (10 random):
+ - black, non-hispanic female diagnosed with glaucoma.
+ - 24-year-old white, Hispanic male diagnosed with glaucoma.
+ - The patient is a 42-year-old Caucasian with a suspicion of glaucoma due to optic disc cupping.
+ - A 78-year-old white, non-hispanic female was evaluated and diagnosed with glaucoma.
+ - white, non-hispanic male, highly complex case, doesn't have a glaucoma diagnosis.
+ - white, non-Hispanic female diagnosed with glaucoma.
+ - non-hispanic white female, no glaucoma diagnosis.
+ - 81-year-old white, non-hispanic female diagnosed with glaucoma.
+ - The clinical note describes an 84-year-old white, non-Hispanic female who has been diagnosed with glaucoma.
+ - white, non-hispanic male with no diagnosis of glaucoma.
+
+=== column 'note': notes containing a race/ethnicity word ===
+ train: 812/7000 = 11.6%
+ val  : 101/1000 = 10.1%
+ test : 253/2000 = 12.7%
+ Asian: 69/819 = 8.4%
+ Black: 241/1491 = 16.2%
+ White: 856/7690 = 11.1%
+ example matched sentences (10 random):
+ - asian, non-hispanic male was evaluated and diagnosed with glaucoma.
+ - white, non-hispanic female with no diagnosis of glaucoma.
+ - however, on my review there is an ill-defined hypodensity in the right parietal white matter, which would correspond to the patient's visual field defect and her visual hallucinations.
+ - formulation: this patient experienced sudden, painless loss of vision, like a 'black line' just below fixation in his right eye.
+ - white, non-hispanic male with no diagnosis of glaucoma.
+ - white, hispanic female with no diagnosis of glaucoma.
+ - black, non-hispanic female was evaluated and diagnosed with glaucoma.
+ - white, non-hispanic female with no diagnosis of glaucoma.
+ - glaucoma suspect tmax: 16/16 t current 11/12 c/d ratio: 0.5 ou cct: 610/622, true iop lower than measured family history:denies race:black oct rnfl DATE_TIME normal ou oct rnfl DATE_TIME: normal ou hv
+ - black, non-hispanic male was evaluated and diagnosed with glaucoma.
+
+=== the word 'glaucoma' in gpt4_summary by true label ===
+ label 0: 4910/4952 notes contain 'glaucoma' (99.2%)
+ label 1: 4986/5048 notes contain 'glaucoma' (98.8%)
+
+=== TF-IDF (top 5000 unigrams) + logistic regression on gpt4_summary, TEST ===
+ race macro-AUC 0.6892 (chance 0.5)
+ glaucoma AUC 0.7906
+
+Saved notes_check_output.txt
