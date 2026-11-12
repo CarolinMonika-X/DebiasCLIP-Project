@@ -1,0 +1,118 @@
+{
+  "primary_null": "permuted_race_labels",
+  "primary_null_description": "Permuted race labels (PRIMARY null)",
+  "true_leace_provenance": {
+    "model": "LEACE-Race",
+    "ensemble": "Five-seed LEACE-Race diagnostic ensemble",
+    "seed_list": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "epochs": 30,
+    "batch_size": 128,
+    "threshold": 0.5,
+    "threshold_rule": "probability > threshold",
+    "leace_fit_split": "train",
+    "results_source": "placebo_v2_results.json -> true_leace"
+  },
+  "canonical_leace_provenance": {
+    "model": "LEACE-Race",
+    "canonical_run": "placebo_audit",
+    "canonical_source": "placebo_audit_results.json",
+    "canonical_section": "table1.ensemble",
+    "seed_list": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "results_source": "canonical_results.json -> ensemble_metrics -> leace"
+  },
+  "metric_comparison_and_recomputed_p_values": {
+    "eod_max": {
+      "placebo_v2_true_leace_reference": 0.10177791972745662,
+      "canonical_leace_reference": 0.09443202384754606,
+      "difference_placebo_minus_canonical": 0.007345895879910552,
+      "absolute_difference": 0.007345895879910552,
+      "mismatch_tolerance": 0.002,
+      "mismatch": true,
+      "primary_null_n": 200,
+      "p_values": {
+        "placebo_v2_reference": {
+          "k_null_values_less_than_or_equal_to_reference": 15,
+          "n": 200,
+          "p_value": 0.07960199004975124,
+          "alternative": "left-tailed; count of null values <= reference",
+          "formula": "(k + 1) / (N + 1)"
+        },
+        "canonical_reference": {
+          "k_null_values_less_than_or_equal_to_reference": 5,
+          "n": 200,
+          "p_value": 0.029850746268656716,
+          "alternative": "left-tailed; count of null values <= reference",
+          "formula": "(k + 1) / (N + 1)"
+        }
+      }
+    },
+    "dpd": {
+      "placebo_v2_true_leace_reference": 0.10870331909557579,
+      "canonical_leace_reference": 0.12884517418394137,
+      "difference_placebo_minus_canonical": -0.02014185508836558,
+      "absolute_difference": 0.02014185508836558,
+      "mismatch_tolerance": 0.002,
+      "mismatch": true,
+      "primary_null_n": 200,
+      "p_values": {
+        "placebo_v2_reference": {
+          "k_null_values_less_than_or_equal_to_reference": 8,
+          "n": 200,
+          "p_value": 0.04477611940298507,
+          "alternative": "left-tailed; count of null values <= reference",
+          "formula": "(k + 1) / (N + 1)"
+        },
+        "canonical_reference": {
+          "k_null_values_less_than_or_equal_to_reference": 86,
+          "n": 200,
+          "p_value": 0.43283582089552236,
+          "alternative": "left-tailed; count of null values <= reference",
+          "formula": "(k + 1) / (N + 1)"
+        }
+      }
+    },
+    "fpr_gap": {
+      "placebo_v2_true_leace_reference": 0.10177791972745662,
+      "canonical_leace_reference": 0.09443202384754606,
+      "difference_placebo_minus_canonical": 0.007345895879910552,
+      "absolute_difference": 0.007345895879910552,
+      "mismatch_tolerance": 0.002,
+      "mismatch": true,
+      "primary_null_n": 200,
+      "p_values": {
+        "placebo_v2_reference": {
+          "k_null_values_less_than_or_equal_to_reference": 15,
+          "n": 200,
+          "p_value": 0.07960199004975124,
+          "alternative": "left-tailed; count of null values <= reference",
+          "formula": "(k + 1) / (N + 1)"
+        },
+        "canonical_reference": {
+          "k_null_values_less_than_or_equal_to_reference": 5,
+          "n": 200,
+          "p_value": 0.029850746268656716,
+          "alternative": "left-tailed; count of null values <= reference",
+          "formula": "(k + 1) / (N + 1)"
+        }
+      }
+    }
+  },
+  "eod_max_vs_fpr_gap": {
+    "identical_per_placebo": true,
+    "max_absolute_difference": 0.0,
+    "number_of_placebos": 200,
+    "explanation": "In each placebo, EOD_max equals FPR gap because FPR gap is at least as large as TPR gap, so max(TPR gap, FPR gap) selects FPR gap."
+  }
+}

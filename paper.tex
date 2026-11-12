@@ -14,8 +14,10 @@
 \begin{document}
 \maketitle
 
+\input{tables/abstract_numbers.tex}
+
 \begin{abstract}
-Vision-language foundation models (e.g., CLIP) demonstrate impressive diagnostic potential in clinical ophthalmology. However, their high-dimensional representations risk encoding demographic shortcuts that induce inequitable disparities across patient populations. In this work, we conduct an empirical audit of demographic leakage and representation-level concept erasure on the Harvard-FairVLMed benchmark ($N=10,000$). We evaluate closed-form Linear Erasure After Commuting Erasure (LEACE) across 5 independent seeds with 1,000-iteration paired bootstrap tests. We show that while joint multi-modal LEACE successfully eliminates linear demographic decodability down to random chance (macro-AUC $0.4962$, balanced accuracy $33.33\%$) and achieves statistically verified reductions in Demographic Parity Disparity ($\Delta\text{DPD} = -0.0369$, Bonferroni $99.6\%$ CI: $[-0.0802, -0.0032]$) without detectable loss in diagnostic utility ($\Delta\text{AUC} = -0.0023$, $99.6\%$ CI: $[-0.0065, +0.0020]$), deep non-linear probes retain substantial residual leakage (macro-AUC $0.7645$). We quantify representation geometry (demonstrating a $54.2\%$ reduction in inter-race centroid distance and a $2.05\times$ increase in pathology-to-demographic disentanglement ratio) and visual interpretability (increasing optic disc Energy-in-ROI from $6.91\%$ to $65.23\%$). Finally, we expose the \textit{Clinical Fairness Trap}: when true disease prevalence differs by $21.6\%$, optimizing computer-science parity metrics or applying post-hoc threshold calibration causes substantial clinical harm and overfits held-out cohorts.
+We audit demographic leakage and representation-level concept erasure in multimodal glaucoma screening on the Harvard-FairVLMed benchmark ($N=\AuditTotalN$). In the canonical fixed-threshold run, Raw Dual and LEACE-Race achieve AUCs of $\AuditRawAUC$ and $\AuditLEACEAUC$, respectively; their DPD values are $\AuditRawDPD$ and $\AuditLEACEDPD$, and their EOD$_{\max}$ values are $\AuditRawEOD$ and $\AuditLEACEEOD$. Across $\AuditSeedGroupCount$ paired seed groups, the mean LEACE-minus-Raw changes are $\Delta$AUC $=\AuditDeltaAUC$ (95\% CI $\AuditDeltaAUCCI$; Bonferroni CI $\AuditDeltaAUCAdjustedCI$) and $\Delta$DPD $=\AuditDeltaDPD$ (95\% CI $\AuditDeltaDPDCI$; Bonferroni CI $\AuditDeltaDPDAdjustedCI$). The placebo-run linear race-probe macro-AUC after LEACE is $\AuditLinearProbeAUC$, while the separate converged-INLP audit reports nonlinear race-probe macro-AUC $\AuditNonlinearProbeAUC$ for LEACE. Against the primary permuted-race placebo, Holm-adjusted $p$-values are $\AuditPlaceboEODp$ for EOD$_{\max}$ and $\AuditPlaceboDPDp$ for DPD. These values come from distinct prespecified audit runs and are reported separately rather than pooled.
 \end{abstract}
 
 \section{Introduction}
@@ -23,10 +25,10 @@ Multi-modal foundation models integrating fundus photography and clinical diagno
 
 \section{Methods \& Simulation Setup}
 \subsection{Dataset and Preprocessing}
-We utilize the Harvard-FairVLMed benchmark ($N=10,000$ patients) partitioned into Train ($7,000$), Validation ($1,000$), and Test ($2,000$) splits. Demographics are categorized into Asian ($N=169$ test), Black ($N=302$ test), and White ($N=1,529$ test) cohorts. Glaucoma prevalence exhibits a significant epidemiological baseline disparity: Black ($66.56\%$), White ($48.40\%$), and Asian ($44.97\%$).
+We utilize the Harvard-FairVLMed benchmark ($N=\AuditTotalN$) partitioned into Train ($\AuditTrainN$), Validation ($\AuditValN$), and Test ($\AuditTestN$) splits. Test demographics comprise Asian ($N=\AuditAsianN$), Black ($N=\AuditBlackN$), and White ($N=\AuditWhiteN$) cohorts.
 
 \subsection{Representation-Level Concept Erasure (LEACE)}
-Given concatenated vision-language embeddings $x \in \mathbb{R}^{1024}$ and demographic targets $z \in \{0, 1, 2\}$, closed-form LEACE computes an affine projection matrix:
+Given concatenated vision-language embeddings $x \in \mathbb{R}^{d}$ and demographic targets $z$, closed-form LEACE computes an affine projection matrix:
 \begin{equation}
 P = I - \Sigma_{xx}^{-1/2} U U^T \Sigma_{xx}^{1/2}
 \end{equation}
@@ -35,36 +37,11 @@ where $U$ contains the left singular vectors of the demographic cross-covariance
 \section{Experimental Results}
 
 \subsection{Primary Evaluation \& Statistical Significance}
-Table \ref{tab:primary} reports test performance across 5 seeds. The dual-modal LEACE model ($F_2$) achieves parity improvements while preserving diagnostic utility.
-
-\begin{table}[ht]
-\centering
-\caption{Main Representation Erasure Evaluation on Held-Out Test Set (mean $\pm$ std across 5 random seeds).}
-\label{tab:primary}
-\small
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Model Architecture} & \textbf{Accuracy} & \textbf{AUC} & \textbf{DPD ($\downarrow$)} & \textbf{EOD ($\downarrow$)} \\
-\midrule
-Model A (Image Raw MLP) & $0.6909 \pm 0.0030$ & $0.7634 \pm 0.0007$ & $0.1202 \pm 0.0064$ & $0.0768 \pm 0.0193$ \\
-Model A-LEACE (Image) & $0.6873 \pm 0.0012$ & $0.7595 \pm 0.0008$ & $0.0977 \pm 0.0128$ & $0.0394 \pm 0.0119$ \\
-Model C (Dual Raw MLP) & $0.7301 \pm 0.0092$ & $0.8132 \pm 0.0013$ & $0.1387 \pm 0.0186$ & $0.1082 \pm 0.0413$ \\
-\textbf{Model F2 (Dual Joint LEACE)} & $\mathbf{0.7290 \pm 0.0063}$ & $\mathbf{0.8107 \pm 0.0010}$ & $\mathbf{0.1242 \pm 0.0075}$ & $\mathbf{0.0944 \pm 0.0347}$ \\
-\midrule
-Linear Control: lin\_C & $0.6842 \pm 0.0014$ & $0.7668 \pm 0.0003$ & $0.1075 \pm 0.0032$ & $0.0831 \pm 0.0034$ \\
-Linear Control: lin\_F2 & $0.6882 \pm 0.0016$ & $0.7650 \pm 0.0003$ & $0.0681 \pm 0.0095$ & $0.0314 \pm 0.0039$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\noindent \textbf{Paired Bootstrap Hypothesis Testing ($F_2 - C$):}
-\begin{itemize}
-    \item $\Delta\text{DPD}$: Mean $-0.0369$ | $95\%$ CI: $[-0.0633, -0.0130]$ (\textbf{excludes 0}) | $99.6\%$ Bonferroni CI: $[-0.0802, -0.0032]$ (\textbf{excludes 0}).
-    \item $\Delta\text{AUC}$: Mean $-0.0023$ | $95\%$ CI: $[-0.0051, +0.0005]$ (includes 0) | $99.6\%$ CI: $[-0.0065, +0.0020]$ (includes 0).
-\end{itemize}
+Table \ref{tab:primary} reports the canonical test results. The generated table is read directly from the selected canonical run.
+\input{tables/canonical.tex}
 
 \subsection{Visual Attention Grounding}
-Figure \ref{fig:gradcam} illustrates attention localization. Raw CLIP exhibits diffuse background retinal pigmentation sensitivity ($6.91\%$ energy in optic disc), whereas LEACE focuses on the optic nerve head ($65.23\%$ energy, $+58.32\%$ concentration).
+Figure \ref{fig:gradcam} illustrates attention localization for the evaluated models.
 
 \begin{figure}[htbp]
 \centering
@@ -74,24 +51,8 @@ Figure \ref{fig:gradcam} illustrates attention localization. Raw CLIP exhibits d
 \end{figure}
 
 \subsection{Representation Geometry \& Manifold Collapse}
-Table \ref{tab:geom} and Figure \ref{fig:tsne} quantify geometric structure. LEACE reduces inter-race centroid distance by $54.2\%$ while preserving $94.0\%$ of disease separation, shifting the representation from demographic-dominated to pathology-dominated ($0.83\times \rightarrow 1.70\times$ ratio).
-
-\begin{table}[ht]
-\centering
-\caption{Representation Geometry Metrics on Held-Out Test Split.}
-\label{tab:geom}
-\small
-\begin{tabular}{lccc}
-\toprule
-\textbf{Metric} & \textbf{Raw Dual (C)} & \textbf{LEACE (F2)} & \textbf{Relative Change} \\
-\midrule
-Demographic Silhouette Score & $+0.0039$ & $-0.0033$ & Isotropic Mixing \\
-Inter-Race Centroid Distance & $0.1367$ & $0.0626$ & $-54.2\%$ Collapse \\
-Pathology Centroid Distance ($Y=1$ vs $0$) & $0.1132$ & $0.1064$ & $94.0\%$ Preserved \\
-\textbf{Disease-to-Demographic Ratio} & $\mathbf{0.83\times}$ & $\mathbf{1.70\times}$ & $\mathbf{+2.05\times \text{ Gain}}$ \\
-\bottomrule
-\end{tabular}
-\end{table}
+Figure \ref{fig:tsne} visualizes the representation geometry. Modality and text-leakage results, including generated probe and disparity measurements, are reported in Table \ref{tab:text-modality-ablation}.
+\input{tables/modality.tex}
 
 \begin{figure}[htbp]
 \centering
@@ -101,7 +62,7 @@ Pathology Centroid Distance ($Y=1$ vs $0$) & $0.1132$ & $0.1064$ & $94.0\%$ Pres
 \end{figure}
 
 \subsection{The Clinical Fairness Trap}
-Figure \ref{fig:fairness_trap} illustrates the epidemiological conflict between parity metrics and diagnostic safety. Due to the $21.6\%$ baseline prevalence gap, forcing $\text{DPD}=0$ induces a $14\%$ False Negative Rate penalty on Black patients. Furthermore, empirical group threshold calibration on validation overfits, inflating test disparity ($\Delta\text{EOD} = +0.0977$, $p < 0.05$).
+Figure \ref{fig:fairness_trap} illustrates the potential conflict between parity metrics and diagnostic safety. The operating-point analysis is reported in Table \ref{tab:operating-points-final}.
 
 \begin{figure}[htbp]
 \centering
@@ -110,7 +71,15 @@ Figure \ref{fig:fairness_trap} illustrates the epidemiological conflict between 
 \label{fig:fairness_trap}
 \end{figure}
 
+\subsection{Additional quantitative audits}
+The paired seed-group, placebo, converged-INLP, baseline, and operating-point tables below are generated directly from their saved result files.
+\input{tables/seed_paired.tex}
+\input{tables/placebo_v2.tex}
+\input{tables/inlp.tex}
+\input{tables/baselines.tex}
+\input{tables/opsens.tex}
+
 \section{Discussion \& Conclusion}
-Representation-level concept erasure (LEACE) provides a closed-form, computationally efficient method to eliminate linear demographic decodability and improve saliency grounding without sacrificing clinical diagnostic utility. However, deep non-linear probing reveals persistent residual leakage ($0.7645$ AUC), demonstrating that linear subspace erasure alone is insufficient to address all demographic shortcuts in multi-modal foundation models.
+Representation-level concept erasure (LEACE) provides a closed-form method to reduce linear demographic decodability while retaining diagnostic utility in the reported runs. Nonlinear probing and the cross-run comparisons in the generated audit tables provide important qualifications; the distinct experiments should not be interpreted as a pooled estimate.
 
 \end{document}

@@ -1,0 +1,21 @@
+% Canonical run: placebo_audit (placebo_audit_results.json).
+% All values are read from canonical_results.json; no metrics are recomputed.
+\begin{table}[htbp]
+\centering
+\small
+\caption{Canonical five-seed ensemble results at the recorded fixed threshold. Worst-group AUC is reported as stored in the canonical results.}
+\label{tab:primary}
+\begin{tabular}{lrrrrr}
+\toprule
+Method & AUC & Accuracy & DPD & EOD$_{\max}$ & Worst-group AUC \\
+\midrule
+Raw Dual & 0.8137 & 0.7370 & 0.1717 & 0.1258 & 0.7739 \\
+LEACE-Race & 0.8113 & 0.7310 & 0.1288 & 0.0944 & 0.7702 \\
+INLP & 0.8123 & 0.7335 & 0.1662 & 0.0961 & 0.7729 \\
+Adversarial parity & 0.8138 & 0.7360 & 0.1624 & 0.1159 & 0.7743 \\
+Label-conditioned & 0.5035 & 0.5085 & 0.0000 & 0.0000 & 0.4957 \\
+Sample reweighting & 0.7919 & 0.7160 & 0.1350 & 0.1315 & 0.7490 \\
+Group cutoffs & 0.8137 & 0.7375 & 0.2140 & 0.1654 & 0.7739 \\
+\bottomrule
+\end{tabular}
+\end{table}

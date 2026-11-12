@@ -1,0 +1,258 @@
+{
+  "method": "Text leakage and modality ablation on cached FairVLMed splits",
+  "configuration": {
+    "cache_sha256": "c9a8bc60e1033dfc88c274064e8f38f0b3ae378e28b64c0450f150e16d4383b2",
+    "dataset_id": "harvardairobotics/FairVLMed",
+    "dataset_config": "default",
+    "dataset_split": "train",
+    "split_seed": 42,
+    "dataset_text_sha256": "92654f87b3f1d6314daefc60bab442cc2722d17172d6e48d68931d4655d285c1",
+    "regex_revision": 1,
+    "text_encoder": "ViT-B-32",
+    "text_pretrained": "laion2b_s34b_b79k",
+    "encode_batch_size": 256,
+    "seeds": [
+      0,
+      100,
+      200,
+      300,
+      400
+    ],
+    "head": "Linear(d,256)-LayerNorm-GELU-Dropout(0.2)-Linear(256,2)",
+    "epochs": 30,
+    "batch_size": 128,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "threshold": 0.5,
+    "race_probe_seed": 42,
+    "source_dataset": "harvardairobotics/FairVLMed",
+    "source_config": "default",
+    "source_split": "train",
+    "split_reconstruction": "torch.utils.data.random_split with seed 42 and lengths [7000, 1000, 2000], verified against cached labels and races.",
+    "text_encoder_input": "scrubbed gpt4_summary only",
+    "scrubbed_note_used_for_embedding": false,
+    "scrubbed_note_handling": "The note field is scrubbed and counted; the existing cached text pipeline encodes gpt4_summary only, so note was not concatenated.",
+    "scrubbed_summary_sha256": "08743ce875a8860049cc1426b10ad8be510f0fd526311954c25d8833022c4602",
+    "scrubbed_note_sha256": "f0180d5429b27808d4a826b42e1b57c6d20d81891fdddedb669ada03bb81f454",
+    "scrub_counts": {
+      "total_cases": 10000,
+      "cases_with_any_field_changed": 7637,
+      "summary_cases_changed": 3975,
+      "note_cases_changed": 7367,
+      "changed_fields_total": 11342,
+      "summary_column": "gpt4_summary",
+      "note_column": "note"
+    },
+    "feature_normalization": "Use cached normalized image/text embeddings as-is; scrubbed text vectors are L2-normalized OpenCLIP outputs.",
+    "diagnostic_head": "Linear(d,256)-LayerNorm-GELU-Dropout(0.2)-Linear(256,2)",
+    "optimizer": "AdamW",
+    "threshold_rule": "probability >= 0.50",
+    "model_selection": "Fixed epochs and settings; no test-based selection.",
+    "test_used_for_model_selection": false,
+    "test_race_counts": {
+      "Asian": 169,
+      "Black": 302,
+      "White": 1529
+    },
+    "linear_race_probe": "Train StandardScaler and LogisticRegression(C=0.01, max_iter=1000, lbfgs) on train; evaluate macro one-vs-rest AUC on test.",
+    "nonlinear_race_probe": "StandardScaler fit on train; Linear(d,256)-BatchNorm-ReLU-Dropout(0.2)-Linear(256,3); AdamW(1e-3, 1e-3), 30 epochs; best validation cross-entropy checkpoint.",
+    "leace_fit_split": "train only, using race labels"
+  },
+  "scrub_counts": {
+    "total_cases": 10000,
+    "cases_with_any_field_changed": 7637,
+    "summary_cases_changed": 3975,
+    "note_cases_changed": 7367,
+    "changed_fields_total": 11342,
+    "summary_column": "gpt4_summary",
+    "note_column": "note"
+  },
+  "modalities": {
+    "image": {
+      "feature_dim": 512,
+      "glaucoma": {
+        "auc": 0.7623623227112636,
+        "accuracy_at_0.50": 0.689
+      },
+      "linear_race_probe_macro_auc": 0.8881622085767994,
+      "validation_glaucoma_auc": 0.7668852130325814,
+      "seed_list": [
+        0,
+        100,
+        200,
+        300,
+        400
+      ]
+    },
+    "text": {
+      "feature_dim": 512,
+      "glaucoma": {
+        "auc": 0.7438449711966759,
+        "accuracy_at_0.50": 0.6765
+      },
+      "linear_race_probe_macro_auc": 0.6785381340312308,
+      "validation_glaucoma_auc": 0.7805914786967418,
+      "seed_list": [
+        0,
+        100,
+        200,
+        300,
+        400
+      ]
+    },
+    "joint": {
+      "feature_dim": 1024,
+      "glaucoma": {
+        "auc": 0.8061489770543687,
+        "accuracy_at_0.50": 0.727
+      },
+      "linear_race_probe_macro_auc": 0.8930219594867655,
+      "validation_glaucoma_auc": 0.8297864661654136,
+      "seed_list": [
+        0,
+        100,
+        200,
+        300,
+        400
+      ]
+    }
+  },
+  "joint_comparison": {
+    "Original Raw Dual": {
+      "glaucoma": {
+        "auc": 0.8061489770543687,
+        "accuracy_at_0.50": 0.727,
+        "eod_max": 0.1405301820504631,
+        "dpd": 0.1332928406285513
+      },
+      "linear_race_probe_macro_auc": 0.8930219594867655,
+      "nonlinear_race_probe_macro_auc": 0.8868370409472526
+    },
+    "Original LEACE-Race": {
+      "glaucoma": {
+        "auc": 0.805589815456667,
+        "accuracy_at_0.50": 0.7275,
+        "eod_max": 0.10177791972745662,
+        "dpd": 0.10870331909557579
+      },
+      "linear_race_probe_macro_auc": 0.5445931293067776,
+      "nonlinear_race_probe_macro_auc": 0.8348483438590365
+    },
+    "Scrubbed Raw Dual": {
+      "glaucoma": {
+        "auc": 0.8105842588508079,
+        "accuracy_at_0.50": 0.741,
+        "eod_max": 0.0901735334823805,
+        "dpd": 0.1418159018770328
+      },
+      "linear_race_probe_macro_auc": 0.8756028019485536,
+      "nonlinear_race_probe_macro_auc": 0.8693689986418011
+    },
+    "Scrubbed LEACE-Race": {
+      "glaucoma": {
+        "auc": 0.807504868907114,
+        "accuracy_at_0.50": 0.7315,
+        "eod_max": 0.07482325216025132,
+        "dpd": 0.07911752027900776
+      },
+      "linear_race_probe_macro_auc": 0.515919474861674,
+      "nonlinear_race_probe_macro_auc": 0.7968319216004632
+    }
+  },
+  "race_probe_changes": {
+    "linear_joint_macro_auc": {
+      "original_raw": 0.8930219594867655,
+      "scrubbed_raw": 0.8756028019485536,
+      "scrubbing_delta": -0.017419157538211993,
+      "original_leace": 0.5445931293067776,
+      "scrubbed_leace": 0.515919474861674,
+      "scrubbing_delta_after_leace": -0.028673654445103613
+    },
+    "nonlinear_joint_macro_auc": {
+      "original_raw": 0.8868370409472526,
+      "scrubbed_raw": 0.8693689986418011,
+      "scrubbing_delta": -0.017468042305451514,
+      "original_leace": 0.8348483438590365,
+      "scrubbed_leace": 0.7968319216004632,
+      "scrubbing_delta_after_leace": -0.03801642225857327
+    }
+  },
+  "nonlinear_race_probe_details": {
+    "original_joint": {
+      "macro_auc": 0.8868370409472526,
+      "best_validation_loss": 0.4292861521244049,
+      "best_epoch": 3
+    },
+    "original_leace_joint": {
+      "macro_auc": 0.8348483438590365,
+      "best_validation_loss": 0.5336053967475891,
+      "best_epoch": 6
+    },
+    "scrubbed_joint": {
+      "macro_auc": 0.8693689986418011,
+      "best_validation_loss": 0.46744823455810547,
+      "best_epoch": 2
+    },
+    "scrubbed_leace_joint": {
+      "macro_auc": 0.7968319216004632,
+      "best_validation_loss": 0.5724721550941467,
+      "best_epoch": 4
+    }
+  },
+  "fairness_comparison": {
+    "original": {
+      "raw": {
+        "auc": 0.8061489770543687,
+        "accuracy_at_0.50": 0.727,
+        "eod_max": 0.1405301820504631,
+        "dpd": 0.1332928406285513
+      },
+      "leace": {
+        "auc": 0.805589815456667,
+        "accuracy_at_0.50": 0.7275,
+        "eod_max": 0.10177791972745662,
+        "dpd": 0.10870331909557579
+      },
+      "leace_minus_raw": {
+        "d_eod_max": -0.03875226232300649,
+        "d_dpd": -0.0245895215329755
+      }
+    },
+    "scrubbed": {
+      "raw": {
+        "auc": 0.8105842588508079,
+        "accuracy_at_0.50": 0.741,
+        "eod_max": 0.0901735334823805,
+        "dpd": 0.1418159018770328
+      },
+      "leace": {
+        "auc": 0.807504868907114,
+        "accuracy_at_0.50": 0.7315,
+        "eod_max": 0.07482325216025132,
+        "dpd": 0.07911752027900776
+      },
+      "leace_minus_raw": {
+        "d_eod_max": -0.015350281322129178,
+        "d_dpd": -0.06269838159802504
+      }
+    },
+    "scrubbing_change_in_leace_minus_raw": {
+      "d_eod_max": 0.023401981000877314,
+      "d_dpd": -0.038108860065049543
+    },
+    "scrubbing_effect_by_method": {
+      "raw": {
+        "d_auc": 0.00443528179643915,
+        "d_eod_max": -0.05035664856808261,
+        "d_dpd": 0.008523061248481512
+      },
+      "leace": {
+        "d_auc": 0.0019150534504470684,
+        "d_eod_max": -0.026954667567205298,
+        "d_dpd": -0.029585798816568032
+      }
+    }
+  },
+  "runtime_seconds": 24.582385063171387
+}

@@ -1,0 +1,384 @@
+{
+  "method": "Paired 5-seed Raw Dual versus train-only LEACE-Race",
+  "complete_six_group_audit": true,
+  "selected_groups": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "group_definitions": [
+    {
+      "group_index": 0,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "group_index": 1,
+      "seeds": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    },
+    {
+      "group_index": 2,
+      "seeds": [
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "group_index": 3,
+      "seeds": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ]
+    },
+    {
+      "group_index": 4,
+      "seeds": [
+        20,
+        21,
+        22,
+        23,
+        24
+      ]
+    },
+    {
+      "group_index": 5,
+      "seeds": [
+        25,
+        26,
+        27,
+        28,
+        29
+      ]
+    }
+  ],
+  "delta_convention": "LEACE-Race minus Raw Dual",
+  "threshold": {
+    "value": 0.5,
+    "rule": "probability >= threshold"
+  },
+  "configuration": {
+    "head": "Linear(1024,256)-LayerNorm-GELU-Dropout(0.2)-Linear(256,2)",
+    "epochs": 30,
+    "batch_size": 128,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "threshold": 0.5
+  },
+  "split_sizes": {
+    "train": 7000,
+    "val": 1000,
+    "test": 2000
+  },
+  "test_race_counts": {
+    "Asian": 169,
+    "Black": 302,
+    "White": 1529
+  },
+  "test_used_for_model_selection": false,
+  "leace_fit_split": "train",
+  "group_results": [
+    {
+      "group_index": 0,
+      "seeds": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "raw_metrics": {
+        "auc": 0.8077794482605473,
+        "accuracy": 0.7325,
+        "dpd": 0.14252125867001064,
+        "eod_max": 0.11987650377941017,
+        "worst_group_auc": 0.7711442786069652
+      },
+      "leace_metrics": {
+        "auc": 0.8076449093788105,
+        "accuracy": 0.7335,
+        "dpd": 0.12525961048630435,
+        "eod_max": 0.10177791972745662,
+        "worst_group_auc": 0.7659721196000197
+      },
+      "paired_delta": {
+        "d_auc": -0.00013453888173675654,
+        "d_eod_max": -0.018098584051953553,
+        "d_dpd": -0.01726164818370629,
+        "d_worst_group_auc": -0.005172159006945565
+      }
+    },
+    {
+      "group_index": 1,
+      "seeds": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ],
+      "raw_metrics": {
+        "auc": 0.8080635303602741,
+        "accuracy": 0.732,
+        "dpd": 0.12145852110192407,
+        "eod_max": 0.1306291919514532,
+        "worst_group_auc": 0.7658243436283927
+      },
+      "leace_metrics": {
+        "auc": 0.8063410325584094,
+        "accuracy": 0.729,
+        "dpd": 0.10609741761040792,
+        "eod_max": 0.16288725646758223,
+        "worst_group_auc": 0.75804147578937
+      },
+      "paired_delta": {
+        "d_auc": -0.0017224978018647308,
+        "d_eod_max": 0.03225806451612903,
+        "d_dpd": -0.015361103491516148,
+        "d_worst_group_auc": -0.007782867839022711
+      }
+    },
+    {
+      "group_index": 2,
+      "seeds": [
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "raw_metrics": {
+        "auc": 0.8063380316911587,
+        "accuracy": 0.7235,
+        "dpd": 0.14393197225596616,
+        "eod_max": 0.1405301820504631,
+        "worst_group_auc": 0.7704546574060391
+      },
+      "leace_metrics": {
+        "auc": 0.8050496593515526,
+        "accuracy": 0.7295,
+        "dpd": 0.1068027744033857,
+        "eod_max": 0.09102523155541362,
+        "worst_group_auc": 0.7651839810846757
+      },
+      "paired_delta": {
+        "d_auc": -0.001288372339606103,
+        "d_eod_max": -0.04950495049504949,
+        "d_dpd": -0.03712919785258045,
+        "d_worst_group_auc": -0.0052706763213634655
+      }
+    },
+    {
+      "group_index": 3,
+      "seeds": [
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "raw_metrics": {
+        "auc": 0.8079534985610841,
+        "accuracy": 0.7285,
+        "dpd": 0.14062071397782044,
+        "eod_max": 0.15043117214947302,
+        "worst_group_auc": 0.7686813457465149
+      },
+      "leace_metrics": {
+        "auc": 0.8068191707403439,
+        "accuracy": 0.734,
+        "dpd": 0.12265370900113648,
+        "eod_max": 0.14308527626956247,
+        "worst_group_auc": 0.7608492192502833
+      },
+      "paired_delta": {
+        "d_auc": -0.0011343278207401886,
+        "d_eod_max": -0.007345895879910552,
+        "d_dpd": -0.017967004976683965,
+        "d_worst_group_auc": -0.007832126496231662
+      }
+    },
+    {
+      "group_index": 4,
+      "seeds": [
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "raw_metrics": {
+        "auc": 0.8087317234680823,
+        "accuracy": 0.7335,
+        "dpd": 0.15506093498961554,
+        "eod_max": 0.1413818801234962,
+        "worst_group_auc": 0.7665632234865277
+      },
+      "leace_metrics": {
+        "auc": 0.8073913360961318,
+        "accuracy": 0.732,
+        "dpd": 0.0890512951134449,
+        "eod_max": 0.12247970672951036,
+        "worst_group_auc": 0.7649376877986306
+      },
+      "paired_delta": {
+        "d_auc": -0.0013403873719505244,
+        "d_eod_max": -0.01890217339398584,
+        "d_dpd": -0.06600963987617064,
+        "d_worst_group_auc": -0.0016255356878971394
+      }
+    },
+    {
+      "group_index": 5,
+      "seeds": [
+        25,
+        26,
+        27,
+        28,
+        29
+      ],
+      "raw_metrics": {
+        "auc": 0.8087447272261684,
+        "accuracy": 0.73,
+        "dpd": 0.12075316430894628,
+        "eod_max": 0.1512828702225061,
+        "worst_group_auc": 0.7739027634106694
+      },
+      "leace_metrics": {
+        "auc": 0.8090758229128218,
+        "accuracy": 0.7295,
+        "dpd": 0.11532583565186721,
+        "eod_max": 0.10092622165442353,
+        "worst_group_auc": 0.7719816757795183
+      },
+      "paired_delta": {
+        "d_auc": 0.00033109568665334876,
+        "d_eod_max": -0.050356648568082585,
+        "d_dpd": -0.005427328657079067,
+        "d_worst_group_auc": -0.0019210876311511749
+      }
+    }
+  ],
+  "paired_delta_summary": {
+    "d_auc": {
+      "mean": -0.0008815047548741591,
+      "sd": 0.000796951835672078,
+      "min": -0.0017224978018647308,
+      "max": 0.00033109568665334876,
+      "sign_count": {
+        "positive": 1,
+        "negative": 5,
+        "zero": 0
+      }
+    },
+    "d_eod_max": {
+      "mean": -0.0186583646454755,
+      "sd": 0.030584703913468438,
+      "min": -0.050356648568082585,
+      "max": 0.03225806451612903,
+      "sign_count": {
+        "positive": 1,
+        "negative": 5,
+        "zero": 0
+      }
+    },
+    "d_dpd": {
+      "mean": -0.026525987172956095,
+      "sd": 0.021910176080707673,
+      "min": -0.06600963987617064,
+      "max": -0.005427328657079067,
+      "sign_count": {
+        "positive": 0,
+        "negative": 6,
+        "zero": 0
+      }
+    },
+    "d_worst_group_auc": {
+      "mean": -0.004934075497101953,
+      "sd": 0.0027095694426589514,
+      "min": -0.007832126496231662,
+      "max": -0.0016255356878971394,
+      "sign_count": {
+        "positive": 0,
+        "negative": 6,
+        "zero": 0
+      }
+    }
+  },
+  "bootstrap": {
+    "draws": 10000,
+    "seed": 20261111,
+    "resampling": "For each draw, sample seed groups with replacement; for each selected group occurrence, sample test cases with replacement. The same case multiplicities are used for paired Raw/LEACE metrics.",
+    "nominal_confidence_level": 0.95,
+    "bonferroni_family_size": 4,
+    "bonferroni_adjusted_confidence_level": 0.9875,
+    "intervals": {
+      "d_auc": {
+        "bootstrap_mean": -0.0009025955968090082,
+        "ci_95_percentile": [
+          -0.002561255402887756,
+          0.000747629702773446
+        ],
+        "bonferroni_adjusted_ci": [
+          -0.002952179011121474,
+          0.001180923923434063
+        ]
+      },
+      "d_eod_max": {
+        "bootstrap_mean": -0.0071269548868242395,
+        "ci_95_percentile": [
+          -0.04102299746349341,
+          0.027493173928549244
+        ],
+        "bonferroni_adjusted_ci": [
+          -0.04953845416789491,
+          0.036773265108269275
+        ]
+      },
+      "d_dpd": {
+        "bootstrap_mean": -0.02884709378360248,
+        "ci_95_percentile": [
+          -0.05014130644987746,
+          -0.008132152324180566
+        ],
+        "bonferroni_adjusted_ci": [
+          -0.0565484065531631,
+          -0.003235159476667544
+        ]
+      },
+      "d_worst_group_auc": {
+        "bootstrap_mean": -0.0028948867323649297,
+        "ci_95_percentile": [
+          -0.009079936499356659,
+          0.004078773773718088
+        ],
+        "bonferroni_adjusted_ci": [
+          -0.010624509999206068,
+          0.006136586431611202
+        ]
+      }
+    }
+  },
+  "runtime_seconds": 75.79942280001706
+}

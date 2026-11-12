@@ -1,0 +1,36 @@
+% Text leakage results are from text_ablation_results.json.
+% Scrubbed summaries and notes are counted; the original pipeline embeds gpt4_summary.
+\begin{table}[htbp]
+\centering
+\small
+\caption{Modality and text-leakage ablation. Glaucoma accuracy uses a fixed 0.50 cutoff.}
+\label{tab:text-modality-ablation}
+\begin{tabular}{lrrr}
+\toprule
+Representation & Glaucoma AUC & Glaucoma accuracy & Linear race macro-AUC \\
+\midrule
+Image only & 0.7624 & 0.6890 & 0.8882 \\
+Text only & 0.7438 & 0.6765 & 0.6785 \\
+Joint & 0.8061 & 0.7270 & 0.8930 \\
+Original Raw Dual & 0.8061 & 0.7270 & 0.8930 \\
+Original LEACE-Race & 0.8056 & 0.7275 & 0.5446 \\
+Scrubbed Raw Dual & 0.8106 & 0.7410 & 0.8756 \\
+Scrubbed LEACE-Race & 0.8075 & 0.7315 & 0.5159 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Effect of demographic-term scrubbing on joint-feature race decodability and test disparity.}
+\label{tab:text-scrubbing-effect}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Method & Linear AUC pre & Linear AUC post & Nonlinear AUC pre & Nonlinear AUC post & EOD pre & EOD post & DPD pre & DPD post \\
+\midrule
+Raw Dual & 0.8930 & 0.8756 & 0.8868 & 0.8694 & 0.1405 & 0.0902 & 0.1333 & 0.1418 \\
+LEACE-Race & 0.5446 & 0.5159 & 0.8348 & 0.7968 & 0.1018 & 0.0748 & 0.1087 & 0.0791 \\
+\bottomrule
+\end{tabular}
+\end{table}

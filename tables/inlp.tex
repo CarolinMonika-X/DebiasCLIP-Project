@@ -1,0 +1,18 @@
+% INLP stopping and iteration selection use validation probe AUC only.
+% Convergence iteration: k=14.
+\begin{table}[htbp]
+\centering
+\small
+\caption{Diagnostic and race-decodability results for validation-selected INLP projections and LEACE.}
+\label{tab:inlp-converged}
+\begin{tabular}{lrrrrrr}
+\toprule
+Method & AUC & Accuracy & DPD & EOD$_{\max}$ & Linear race AUC & Nonlinear race AUC \\
+\midrule
+LEACE & 0.8056 & 0.7275 & 0.1087 & 0.1018 & 0.5137 & 0.8351 \\
+INLP k=2 & 0.8070 & 0.7280 & 0.1378 & 0.1009 & 0.6537 & 0.8111 \\
+INLP k=14 (converged) & 0.7731 & 0.6980 & 0.1411 & 0.1595 & 0.5002 & 0.7205 \\
+INLP k=14 (closest to chance) & 0.7731 & 0.6980 & 0.1411 & 0.1595 & 0.5002 & 0.7205 \\
+\bottomrule
+\end{tabular}
+\end{table}

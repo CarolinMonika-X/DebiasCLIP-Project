@@ -1,0 +1,30 @@
+ABSTRACT NUMBERS - GENERATED FROM SAVED JSON RESULTS
+Canonical model metrics (placebo-audit run; fixed recorded threshold)
+Method       AUC      Accuracy  DPD      EOD_max  Worst-group AUC
+Raw Dual     0.8137   0.7370    0.1717   0.1258   0.7739
+LEACE-Race   0.8113   0.7310    0.1288   0.0944   0.7702
+Split sizes: train=7000, validation=1000, test=2000; test race counts Asian/Black/White=169/302/1529.
+
+Paired seed groups: 6; seeds per group: 5; two-level bootstrap draws: 10000.
+Paired seed-group deltas (LEACE minus Raw Dual)
+dAUC: mean=-0.0009, SD=0.0008; 95% CI=[-0.0026, +0.0007]; Bonferroni CI=[-0.0030, +0.0012].
+dEOD_max: mean=-0.0187, SD=0.0306; 95% CI=[-0.0410, +0.0275]; Bonferroni CI=[-0.0495, +0.0368].
+dDPD: mean=-0.0265, SD=0.0219; 95% CI=[-0.0501, -0.0081]; Bonferroni CI=[-0.0565, -0.0032].
+
+Race probe macro-AUCs (separate experiments; do not pool)
+Placebo audit, true LEACE linear probe: 0.4879
+Converged-INLP audit, LEACE nonlinear probe: 0.8351
+
+Placebo p-values (primary null: permuted_race_labels; raw / Holm over placebo types)
+eod_max    p=0.0796, Holm-p=0.1592
+dpd        p=0.0448, Holm-p=0.0896
+fpr_gap    p=0.0796, Holm-p=0.1592
+
+Primary placebo null distributions (mean +/- SD; 2.5th-97.5th percentiles)
+eod_max    0.1319 +/- 0.0196 [0.0973, 0.1623] (N=200)
+dpd        0.1306 +/- 0.0117 [0.1056, 0.1518] (N=200)
+fpr_gap    0.1319 +/- 0.0196 [0.0973, 0.1623] (N=200)
+
+Sources: canonical_results.json; seed_paired_results.json;
+placebo_v2_results.json; inlp_converged_results.json.
+Values are kept run-specific; results from distinct protocols are not combined.

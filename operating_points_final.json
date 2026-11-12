@@ -1,0 +1,1144 @@
+{
+  "method": "Canonical Raw Dual versus train-only LEACE operating-point audit",
+  "canonical_source": "placebo_audit_results.json",
+  "canonical_run": "placebo_audit",
+  "canonical_configuration": {
+    "source_script": "src\\placebo_audit.py",
+    "feature_normalization": "Cached image and text embeddings are independently L2-normalized; neither benchmark applies an additional StandardScaler.",
+    "feature_layout": "Concatenate cached image[512] then text[512] features",
+    "head_architecture": "Linear(1024,512) -> ReLU -> Dropout(0.1) -> Linear(512,2)",
+    "optimizer": "Adam (default weight decay 0)",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0,
+    "batch_size": 256,
+    "epochs": 40,
+    "class_weighting": "None for Raw Dual",
+    "seed_list": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "seed_mapping": "Raw ensemble uses first five seeds from raw30: torch.manual_seed(seed), np.random.seed(seed)",
+    "threshold_rule": "probability > 0.50",
+    "ensemble": "Mean predicted probability over raw seeds 0-4; these are the first five of the separate 30-seed raw variability run",
+    "split_file": "cached_features.pt",
+    "split_sizes": {
+      "train": 7000,
+      "val": 1000,
+      "test": 2000
+    },
+    "model_selection": "Raw baseline fixed; fairness settings were selected on validation",
+    "numpy_seed": "np.random.seed(seed) per raw-head seed"
+  },
+  "configuration": {
+    "cache_sha256": "c9a8bc60e1033dfc88c274064e8f38f0b3ae378e28b64c0450f150e16d4383b2",
+    "canonical_results_sha256": "a9079d6d44655b16e6fd2b1e070b2acafcbec223475961f1f24da837e4e8ef8f",
+    "canonical_run": "placebo_audit",
+    "canonical_source": "placebo_audit_results.json",
+    "seeds": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "epochs": 40,
+    "batch_size": 256,
+    "optimizer": "Adam",
+    "learning_rate": 0.001,
+    "torch_num_threads": 16,
+    "threshold_rule": "probability > cutoff",
+    "bootstrap_resamples": 1000,
+    "bootstrap_seed": 20261112,
+    "test_race_counts": {
+      "Asian": 169,
+      "Black": 302,
+      "White": 1529
+    },
+    "leace_fit_split": "train only",
+    "leace_race_labels_used_for_fit": true,
+    "model_selection_split": "validation",
+    "threshold_tie_breaks": {
+      "validation_youden": "Among tied Youden maxima, choose the threshold nearest 0.50, then the higher threshold.",
+      "matched_specificity_0.80": "Choose specificity closest to 0.80; ties maximize sensitivity, then choose threshold nearest 0.50.",
+      "matched_sensitivity_0.80": "Choose sensitivity closest to 0.80; ties maximize specificity, then choose threshold nearest 0.50."
+    },
+    "test_used_for_cutoff_selection": false
+  },
+  "delta_convention": "LEACE minus Raw Dual",
+  "bootstrap": {
+    "draws": 1000,
+    "seed": 20261112,
+    "delta_convention": "LEACE minus Raw Dual",
+    "resampling": "Paired ordinary bootstrap over test cases; identical case multiplicities are applied to Raw and LEACE at every operating point. Validation-selected thresholds remain fixed within each draw.",
+    "point_estimates": {
+      "fixed_0.50": {
+        "d_auc": -0.0024537091219362095,
+        "d_eod_max": -0.031406366443095884,
+        "d_dpd": -0.04283083192915077
+      },
+      "validation_youden": {
+        "d_auc": -0.0024537091219362095,
+        "d_eod_max": 0.01671457468327478,
+        "d_dpd": 0.004780751596849375
+      },
+      "matched_specificity_0.80": {
+        "d_auc": -0.0024537091219362095,
+        "d_eod_max": -0.039603960396039584,
+        "d_dpd": -0.0331125827814569
+      },
+      "matched_sensitivity_0.80": {
+        "d_auc": -0.0024537091219362095,
+        "d_eod_max": 0.03310976258916215,
+        "d_dpd": 0.022257925467298767
+      }
+    }
+  },
+  "holm_adjustment": {
+    "family_size": 12,
+    "familywise_alpha": 0.05,
+    "method": "Holm step-down over two-sided paired-bootstrap p-values. Each ranked test receives a percentile interval at confidence 1 - alpha/(m-rank+1); Holm rejection stops at the first non-rejection. Non-rejected intervals are widened to include zero.",
+    "tests": {
+      "fixed_0.50:d_dpd": {
+        "operating_point": "fixed_0.50",
+        "endpoint": "d_dpd",
+        "rank_by_unadjusted_p": 1,
+        "unadjusted_bootstrap_p_value": 0.015984015984015984,
+        "holm_adjusted_p_value": 0.1918081918081918,
+        "holm_step_alpha": 0.004166666666666667,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.07381558837877383,
+          -0.0077873857692533025
+        ],
+        "holm_adjusted_ci": [
+          -0.09144177819249749,
+          0.0069368004962516785
+        ],
+        "holm_ci_confidence_level": 0.9958333333333333
+      },
+      "matched_specificity_0.80:d_dpd": {
+        "operating_point": "matched_specificity_0.80",
+        "endpoint": "d_dpd",
+        "rank_by_unadjusted_p": 2,
+        "unadjusted_bootstrap_p_value": 0.015984015984015984,
+        "holm_adjusted_p_value": 0.1918081918081918,
+        "holm_step_alpha": 0.004545454545454546,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.06122496322995634,
+          -0.0062760472229973574
+        ],
+        "holm_adjusted_ci": [
+          -0.07618419569229651,
+          0.005156818278414345
+        ],
+        "holm_ci_confidence_level": 0.9954545454545455
+      },
+      "fixed_0.50:d_auc": {
+        "operating_point": "fixed_0.50",
+        "endpoint": "d_auc",
+        "rank_by_unadjusted_p": 3,
+        "unadjusted_bootstrap_p_value": 0.10789210789210789,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.005,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.005028383592706389,
+          0.0004324739569604445
+        ],
+        "holm_adjusted_ci": [
+          -0.005923656715658683,
+          0.001427188669522049
+        ],
+        "holm_ci_confidence_level": 0.995
+      },
+      "matched_sensitivity_0.80:d_auc": {
+        "operating_point": "matched_sensitivity_0.80",
+        "endpoint": "d_auc",
+        "rank_by_unadjusted_p": 4,
+        "unadjusted_bootstrap_p_value": 0.10789210789210789,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.005555555555555556,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.005028383592706389,
+          0.0004324739569604445
+        ],
+        "holm_adjusted_ci": [
+          -0.005915945718407523,
+          0.0014241181785444232
+        ],
+        "holm_ci_confidence_level": 0.9944444444444445
+      },
+      "matched_specificity_0.80:d_auc": {
+        "operating_point": "matched_specificity_0.80",
+        "endpoint": "d_auc",
+        "rank_by_unadjusted_p": 5,
+        "unadjusted_bootstrap_p_value": 0.10789210789210789,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.00625,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.005028383592706389,
+          0.0004324739569604445
+        ],
+        "holm_adjusted_ci": [
+          -0.005880765850023664,
+          0.0014044919796947746
+        ],
+        "holm_ci_confidence_level": 0.99375
+      },
+      "validation_youden:d_auc": {
+        "operating_point": "validation_youden",
+        "endpoint": "d_auc",
+        "rank_by_unadjusted_p": 6,
+        "unadjusted_bootstrap_p_value": 0.10789210789210789,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.0071428571428571435,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.005028383592706389,
+          0.0004324739569604445
+        ],
+        "holm_adjusted_ci": [
+          -0.00577490951030924,
+          0.0013417832802115684
+        ],
+        "holm_ci_confidence_level": 0.9928571428571429
+      },
+      "matched_specificity_0.80:d_eod_max": {
+        "operating_point": "matched_specificity_0.80",
+        "endpoint": "d_eod_max",
+        "rank_by_unadjusted_p": 7,
+        "unadjusted_bootstrap_p_value": 0.2817182817182817,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.008333333333333333,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.07548707957342084,
+          0.024741306114056564
+        ],
+        "holm_adjusted_ci": [
+          -0.08818277310924372,
+          0.049438101860992525
+        ],
+        "holm_ci_confidence_level": 0.9916666666666667
+      },
+      "fixed_0.50:d_eod_max": {
+        "operating_point": "fixed_0.50",
+        "endpoint": "d_eod_max",
+        "rank_by_unadjusted_p": 8,
+        "unadjusted_bootstrap_p_value": 0.4095904095904096,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.01,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.07695384211906628,
+          0.04139829333897854
+        ],
+        "holm_adjusted_ci": [
+          -0.09545429788549052,
+          0.0631667399294226
+        ],
+        "holm_ci_confidence_level": 0.99
+      },
+      "matched_sensitivity_0.80:d_eod_max": {
+        "operating_point": "matched_sensitivity_0.80",
+        "endpoint": "d_eod_max",
+        "rank_by_unadjusted_p": 9,
+        "unadjusted_bootstrap_p_value": 0.5494505494505495,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.0125,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.038358205970423984,
+          0.07776541782261479
+        ],
+        "holm_adjusted_ci": [
+          -0.05050625494763126,
+          0.08857527252054946
+        ],
+        "holm_ci_confidence_level": 0.9875
+      },
+      "matched_sensitivity_0.80:d_dpd": {
+        "operating_point": "matched_sensitivity_0.80",
+        "endpoint": "d_dpd",
+        "rank_by_unadjusted_p": 10,
+        "unadjusted_bootstrap_p_value": 0.6093906093906094,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.016666666666666666,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.03174606360650992,
+          0.052429425837320576
+        ],
+        "holm_adjusted_ci": [
+          -0.03952276522495641,
+          0.0575259493497155
+        ],
+        "holm_ci_confidence_level": 0.9833333333333333
+      },
+      "validation_youden:d_eod_max": {
+        "operating_point": "validation_youden",
+        "endpoint": "d_eod_max",
+        "rank_by_unadjusted_p": 11,
+        "unadjusted_bootstrap_p_value": 0.7572427572427572,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.025,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.061187252073956304,
+          0.07798540886441585
+        ],
+        "holm_adjusted_ci": [
+          -0.07220734650417712,
+          0.08668525666677414
+        ],
+        "holm_ci_confidence_level": 0.975
+      },
+      "validation_youden:d_dpd": {
+        "operating_point": "validation_youden",
+        "endpoint": "d_dpd",
+        "rank_by_unadjusted_p": 12,
+        "unadjusted_bootstrap_p_value": 0.8491508491508492,
+        "holm_adjusted_p_value": 1.0,
+        "holm_step_alpha": 0.05,
+        "holm_rejects_at_0.05": false,
+        "ci_95_percentile": [
+          -0.05203171821812893,
+          0.04628387998731393
+        ],
+        "holm_adjusted_ci": [
+          -0.05203171821812893,
+          0.04628387998731393
+        ],
+        "holm_ci_confidence_level": 0.95
+      }
+    }
+  },
+  "operating_points": {
+    "fixed_0.50": {
+      "cutoffs": {
+        "raw_dual": {
+          "threshold": 0.5,
+          "validation_sensitivity": 0.6821052631578948,
+          "validation_specificity": 0.7980952380952381
+        },
+        "leace": {
+          "threshold": 0.5,
+          "validation_sensitivity": 0.6905263157894737,
+          "validation_specificity": 0.7904761904761904
+        },
+        "selection_split": "validation"
+      },
+      "test_metrics": {
+        "raw_dual": {
+          "auc": 0.8137391706203092,
+          "accuracy": 0.737,
+          "dpd": 0.17167600611309214,
+          "tpr_gap": 0.036699857752489295,
+          "fpr_gap": 0.12583839029064195,
+          "eod_max": 0.12583839029064195,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.38461538461538464,
+              "tpr": 0.6578947368421053,
+              "fpr": 0.16129032258064516
+            },
+            "Black": {
+              "positive_rate": 0.5562913907284768,
+              "tpr": 0.6915422885572139,
+              "fpr": 0.2871287128712871
+            },
+            "White": {
+              "positive_rate": 0.4460431654676259,
+              "tpr": 0.6945945945945946,
+              "fpr": 0.21292775665399238
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "White",
+            "tpr_min": "Asian",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        },
+        "leace": {
+          "auc": 0.811285461498373,
+          "accuracy": 0.731,
+          "dpd": 0.12884517418394137,
+          "tpr_gap": 0.020751505629745925,
+          "fpr_gap": 0.09443202384754606,
+          "eod_max": 0.09443202384754606,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.41420118343195267,
+              "tpr": 0.6973684210526315,
+              "fpr": 0.1827956989247312
+            },
+            "Black": {
+              "positive_rate": 0.543046357615894,
+              "tpr": 0.6766169154228856,
+              "fpr": 0.27722772277227725
+            },
+            "White": {
+              "positive_rate": 0.45454545454545453,
+              "tpr": 0.6959459459459459,
+              "fpr": 0.22813688212927757
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "Asian",
+            "tpr_min": "Black",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        }
+      },
+      "deltas": {
+        "d_auc": {
+          "point_estimate": -0.0024537091219362095,
+          "ci_95_percentile": [
+            -0.005028383592706389,
+            0.0004324739569604445
+          ],
+          "bootstrap_mean": -0.002417198329577869,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.005923656715658683,
+            0.001427188669522049
+          ]
+        },
+        "d_eod_max": {
+          "point_estimate": -0.031406366443095884,
+          "ci_95_percentile": [
+            -0.07695384211906628,
+            0.04139829333897854
+          ],
+          "bootstrap_mean": -0.023222002713789873,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.09545429788549052,
+            0.0631667399294226
+          ]
+        },
+        "d_dpd": {
+          "point_estimate": -0.04283083192915077,
+          "ci_95_percentile": [
+            -0.07381558837877383,
+            -0.0077873857692533025
+          ],
+          "bootstrap_mean": -0.04078663913091211,
+          "holm_adjusted_p_value": 0.1918081918081918,
+          "holm_adjusted_ci": [
+            -0.09144177819249749,
+            0.0069368004962516785
+          ]
+        }
+      }
+    },
+    "validation_youden": {
+      "cutoffs": {
+        "raw_dual": {
+          "threshold": 0.3426231563091278,
+          "validation_sensitivity": 0.8168421052631579,
+          "validation_specificity": 0.6895238095238095,
+          "validation_youden_j": 0.5063659147869675
+        },
+        "leace": {
+          "threshold": 0.39803868532180786,
+          "validation_sensitivity": 0.7768421052631579,
+          "validation_specificity": 0.7295238095238096,
+          "validation_youden_j": 0.5063659147869675
+        },
+        "selection_split": "validation"
+      },
+      "test_metrics": {
+        "raw_dual": {
+          "auc": 0.8137391706203092,
+          "accuracy": 0.7285,
+          "dpd": 0.12590618754653404,
+          "tpr_gap": 0.05426813301911493,
+          "fpr_gap": 0.13371659746619824,
+          "eod_max": 0.13371659746619824,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.5562130177514792,
+              "tpr": 0.8552631578947368,
+              "fpr": 0.3118279569892473
+            },
+            "Black": {
+              "positive_rate": 0.6821192052980133,
+              "tpr": 0.8009950248756219,
+              "fpr": 0.44554455445544555
+            },
+            "White": {
+              "positive_rate": 0.566383257030739,
+              "tpr": 0.8027027027027027,
+              "fpr": 0.34474017743979724
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "Asian",
+            "tpr_min": "Black",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        },
+        "leace": {
+          "auc": 0.811285461498373,
+          "accuracy": 0.7385,
+          "dpd": 0.13068693914338342,
+          "tpr_gap": 0.06631317098716949,
+          "fpr_gap": 0.15043117214947302,
+          "eod_max": 0.15043117214947302,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.48520710059171596,
+              "tpr": 0.8026315789473685,
+              "fpr": 0.22580645161290322
+            },
+            "Black": {
+              "positive_rate": 0.6158940397350994,
+              "tpr": 0.736318407960199,
+              "fpr": 0.37623762376237624
+            },
+            "White": {
+              "positive_rate": 0.5284499672988882,
+              "tpr": 0.7783783783783784,
+              "fpr": 0.29404309252217997
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "Asian",
+            "tpr_min": "Black",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        }
+      },
+      "deltas": {
+        "d_auc": {
+          "point_estimate": -0.0024537091219362095,
+          "ci_95_percentile": [
+            -0.005028383592706389,
+            0.0004324739569604445
+          ],
+          "bootstrap_mean": -0.002417198329577869,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.00577490951030924,
+            0.0013417832802115684
+          ]
+        },
+        "d_eod_max": {
+          "point_estimate": 0.01671457468327478,
+          "ci_95_percentile": [
+            -0.061187252073956304,
+            0.07798540886441585
+          ],
+          "bootstrap_mean": 0.009238669497221842,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.07220734650417712,
+            0.08668525666677414
+          ]
+        },
+        "d_dpd": {
+          "point_estimate": 0.004780751596849375,
+          "ci_95_percentile": [
+            -0.05203171821812893,
+            0.04628387998731393
+          ],
+          "bootstrap_mean": -0.0043384633449112826,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.05203171821812893,
+            0.04628387998731393
+          ]
+        }
+      }
+    },
+    "matched_specificity_0.80": {
+      "cutoffs": {
+        "raw_dual": {
+          "threshold": 0.5014800071716309,
+          "validation_sensitivity": 0.6821052631578948,
+          "validation_specificity": 0.8,
+          "target_specificity": 0.8,
+          "absolute_specificity_target_error": 0.0
+        },
+        "leace": {
+          "threshold": 0.5169118702411651,
+          "validation_sensitivity": 0.671578947368421,
+          "validation_specificity": 0.8,
+          "target_specificity": 0.8,
+          "absolute_specificity_target_error": 0.0
+        },
+        "selection_split": "validation"
+      },
+      "test_metrics": {
+        "raw_dual": {
+          "auc": 0.8137391706203092,
+          "accuracy": 0.7355,
+          "dpd": 0.17167600611309214,
+          "tpr_gap": 0.03364755171510858,
+          "fpr_gap": 0.12583839029064195,
+          "eod_max": 0.12583839029064195,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.38461538461538464,
+              "tpr": 0.6578947368421053,
+              "fpr": 0.16129032258064516
+            },
+            "Black": {
+              "positive_rate": 0.5562913907284768,
+              "tpr": 0.6915422885572139,
+              "fpr": 0.2871287128712871
+            },
+            "White": {
+              "positive_rate": 0.44408109875735774,
+              "tpr": 0.6905405405405406,
+              "fpr": 0.21292775665399238
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "Black",
+            "tpr_min": "Asian",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        },
+        "leace": {
+          "auc": 0.811285461498373,
+          "accuracy": 0.7325,
+          "dpd": 0.13856342333163524,
+          "tpr_gap": 0.02724039829302982,
+          "fpr_gap": 0.08623442989460237,
+          "eod_max": 0.08623442989460237,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.38461538461538464,
+              "tpr": 0.6578947368421053,
+              "fpr": 0.16129032258064516
+            },
+            "Black": {
+              "positive_rate": 0.5231788079470199,
+              "tpr": 0.6616915422885572,
+              "fpr": 0.24752475247524752
+            },
+            "White": {
+              "positive_rate": 0.44146500981033354,
+              "tpr": 0.6851351351351351,
+              "fpr": 0.21292775665399238
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "White",
+            "tpr_min": "Asian",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        }
+      },
+      "deltas": {
+        "d_auc": {
+          "point_estimate": -0.0024537091219362095,
+          "ci_95_percentile": [
+            -0.005028383592706389,
+            0.0004324739569604445
+          ],
+          "bootstrap_mean": -0.002417198329577869,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.005880765850023664,
+            0.0014044919796947746
+          ]
+        },
+        "d_eod_max": {
+          "point_estimate": -0.039603960396039584,
+          "ci_95_percentile": [
+            -0.07548707957342084,
+            0.024741306114056564
+          ],
+          "bootstrap_mean": -0.027595255745551127,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.08818277310924372,
+            0.049438101860992525
+          ]
+        },
+        "d_dpd": {
+          "point_estimate": -0.0331125827814569,
+          "ci_95_percentile": [
+            -0.06122496322995634,
+            -0.0062760472229973574
+          ],
+          "bootstrap_mean": -0.03277322724355582,
+          "holm_adjusted_p_value": 0.1918081918081918,
+          "holm_adjusted_ci": [
+            -0.07618419569229651,
+            0.005156818278414345
+          ]
+        }
+      }
+    },
+    "matched_sensitivity_0.80": {
+      "cutoffs": {
+        "raw_dual": {
+          "threshold": 0.35903767347335813,
+          "validation_sensitivity": 0.8,
+          "validation_specificity": 0.6933333333333334,
+          "target_sensitivity": 0.8,
+          "absolute_sensitivity_target_error": 0.0
+        },
+        "leace": {
+          "threshold": 0.3642218768596649,
+          "validation_sensitivity": 0.8,
+          "validation_specificity": 0.6952380952380952,
+          "target_sensitivity": 0.8,
+          "absolute_sensitivity_target_error": 0.0
+        },
+        "selection_split": "validation"
+      },
+      "test_metrics": {
+        "raw_dual": {
+          "auc": 0.8137391706203092,
+          "accuracy": 0.733,
+          "dpd": 0.11125044084799562,
+          "tpr_gap": 0.07593610892903901,
+          "fpr_gap": 0.13456829553923133,
+          "eod_max": 0.13456829553923133,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.5443786982248521,
+              "tpr": 0.8421052631578947,
+              "fpr": 0.3010752688172043
+            },
+            "Black": {
+              "positive_rate": 0.6556291390728477,
+              "tpr": 0.7661691542288557,
+              "fpr": 0.43564356435643564
+            },
+            "White": {
+              "positive_rate": 0.5487246566383257,
+              "tpr": 0.7945945945945946,
+              "fpr": 0.3181242078580482
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "Asian",
+            "tpr_min": "Black",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        },
+        "leace": {
+          "auc": 0.811285461498373,
+          "accuracy": 0.7335,
+          "dpd": 0.1335083663152944,
+          "tpr_gap": 0.06454569258968312,
+          "fpr_gap": 0.16767805812839348,
+          "eod_max": 0.16767805812839348,
+          "group_metrics": {
+            "Asian": {
+              "positive_rate": 0.5088757396449705,
+              "tpr": 0.8157894736842105,
+              "fpr": 0.25806451612903225
+            },
+            "Black": {
+              "positive_rate": 0.6423841059602649,
+              "tpr": 0.7512437810945274,
+              "fpr": 0.42574257425742573
+            },
+            "White": {
+              "positive_rate": 0.5546108567691301,
+              "tpr": 0.8013513513513514,
+              "fpr": 0.3231939163498099
+            }
+          },
+          "gap_groups": {
+            "tpr_max": "Asian",
+            "tpr_min": "Black",
+            "fpr_max": "Black",
+            "fpr_min": "Asian"
+          }
+        }
+      },
+      "deltas": {
+        "d_auc": {
+          "point_estimate": -0.0024537091219362095,
+          "ci_95_percentile": [
+            -0.005028383592706389,
+            0.0004324739569604445
+          ],
+          "bootstrap_mean": -0.002417198329577869,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.005915945718407523,
+            0.0014241181785444232
+          ]
+        },
+        "d_eod_max": {
+          "point_estimate": 0.03310976258916215,
+          "ci_95_percentile": [
+            -0.038358205970423984,
+            0.07776541782261479
+          ],
+          "bootstrap_mean": 0.018063524698025066,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.05050625494763126,
+            0.08857527252054946
+          ]
+        },
+        "d_dpd": {
+          "point_estimate": 0.022257925467298767,
+          "ci_95_percentile": [
+            -0.03174606360650992,
+            0.052429425837320576
+          ],
+          "bootstrap_mean": 0.010617273541730893,
+          "holm_adjusted_p_value": 1.0,
+          "holm_adjusted_ci": [
+            -0.03952276522495641,
+            0.0575259493497155
+          ]
+        }
+      }
+    }
+  },
+  "group_gap_decomposition": {
+    "fixed_0.50": {
+      "raw": {
+        "tpr_gap": 0.036699857752489295,
+        "fpr_gap": 0.12583839029064195,
+        "gap_groups": {
+          "tpr_max": "White",
+          "tpr_min": "Asian",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.38461538461538464,
+            "tpr": 0.6578947368421053,
+            "fpr": 0.16129032258064516
+          },
+          "Black": {
+            "positive_rate": 0.5562913907284768,
+            "tpr": 0.6915422885572139,
+            "fpr": 0.2871287128712871
+          },
+          "White": {
+            "positive_rate": 0.4460431654676259,
+            "tpr": 0.6945945945945946,
+            "fpr": 0.21292775665399238
+          }
+        }
+      },
+      "leace": {
+        "tpr_gap": 0.020751505629745925,
+        "fpr_gap": 0.09443202384754606,
+        "gap_groups": {
+          "tpr_max": "Asian",
+          "tpr_min": "Black",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.41420118343195267,
+            "tpr": 0.6973684210526315,
+            "fpr": 0.1827956989247312
+          },
+          "Black": {
+            "positive_rate": 0.543046357615894,
+            "tpr": 0.6766169154228856,
+            "fpr": 0.27722772277227725
+          },
+          "White": {
+            "positive_rate": 0.45454545454545453,
+            "tpr": 0.6959459459459459,
+            "fpr": 0.22813688212927757
+          }
+        }
+      },
+      "delta_leace_minus_raw": {
+        "tpr_gap": -0.01594835212274337,
+        "fpr_gap": -0.031406366443095884,
+        "per_group": {
+          "Asian": {
+            "tpr": 0.039473684210526216,
+            "fpr": 0.02150537634408603
+          },
+          "Black": {
+            "tpr": -0.01492537313432829,
+            "fpr": -0.009900990099009854
+          },
+          "White": {
+            "tpr": 0.0013513513513513375,
+            "fpr": 0.01520912547528519
+          }
+        }
+      },
+      "fpr_gap_change_drivers": {
+        "raw_max_fpr_group": "Black",
+        "raw_min_fpr_group": "Asian",
+        "leace_max_fpr_group": "Black",
+        "leace_min_fpr_group": "Asian",
+        "largest_absolute_group_fpr_change": "Asian",
+        "largest_absolute_group_fpr_change_value": 0.02150537634408603
+      }
+    },
+    "validation_youden": {
+      "raw": {
+        "tpr_gap": 0.05426813301911493,
+        "fpr_gap": 0.13371659746619824,
+        "gap_groups": {
+          "tpr_max": "Asian",
+          "tpr_min": "Black",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.5562130177514792,
+            "tpr": 0.8552631578947368,
+            "fpr": 0.3118279569892473
+          },
+          "Black": {
+            "positive_rate": 0.6821192052980133,
+            "tpr": 0.8009950248756219,
+            "fpr": 0.44554455445544555
+          },
+          "White": {
+            "positive_rate": 0.566383257030739,
+            "tpr": 0.8027027027027027,
+            "fpr": 0.34474017743979724
+          }
+        }
+      },
+      "leace": {
+        "tpr_gap": 0.06631317098716949,
+        "fpr_gap": 0.15043117214947302,
+        "gap_groups": {
+          "tpr_max": "Asian",
+          "tpr_min": "Black",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.48520710059171596,
+            "tpr": 0.8026315789473685,
+            "fpr": 0.22580645161290322
+          },
+          "Black": {
+            "positive_rate": 0.6158940397350994,
+            "tpr": 0.736318407960199,
+            "fpr": 0.37623762376237624
+          },
+          "White": {
+            "positive_rate": 0.5284499672988882,
+            "tpr": 0.7783783783783784,
+            "fpr": 0.29404309252217997
+          }
+        }
+      },
+      "delta_leace_minus_raw": {
+        "tpr_gap": 0.012045037968054562,
+        "fpr_gap": 0.01671457468327478,
+        "per_group": {
+          "Asian": {
+            "tpr": -0.05263157894736836,
+            "fpr": -0.08602150537634409
+          },
+          "Black": {
+            "tpr": -0.06467661691542292,
+            "fpr": -0.06930693069306931
+          },
+          "White": {
+            "tpr": -0.024324324324324298,
+            "fpr": -0.05069708491761726
+          }
+        }
+      },
+      "fpr_gap_change_drivers": {
+        "raw_max_fpr_group": "Black",
+        "raw_min_fpr_group": "Asian",
+        "leace_max_fpr_group": "Black",
+        "leace_min_fpr_group": "Asian",
+        "largest_absolute_group_fpr_change": "Asian",
+        "largest_absolute_group_fpr_change_value": -0.08602150537634409
+      }
+    },
+    "matched_specificity_0.80": {
+      "raw": {
+        "tpr_gap": 0.03364755171510858,
+        "fpr_gap": 0.12583839029064195,
+        "gap_groups": {
+          "tpr_max": "Black",
+          "tpr_min": "Asian",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.38461538461538464,
+            "tpr": 0.6578947368421053,
+            "fpr": 0.16129032258064516
+          },
+          "Black": {
+            "positive_rate": 0.5562913907284768,
+            "tpr": 0.6915422885572139,
+            "fpr": 0.2871287128712871
+          },
+          "White": {
+            "positive_rate": 0.44408109875735774,
+            "tpr": 0.6905405405405406,
+            "fpr": 0.21292775665399238
+          }
+        }
+      },
+      "leace": {
+        "tpr_gap": 0.02724039829302982,
+        "fpr_gap": 0.08623442989460237,
+        "gap_groups": {
+          "tpr_max": "White",
+          "tpr_min": "Asian",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.38461538461538464,
+            "tpr": 0.6578947368421053,
+            "fpr": 0.16129032258064516
+          },
+          "Black": {
+            "positive_rate": 0.5231788079470199,
+            "tpr": 0.6616915422885572,
+            "fpr": 0.24752475247524752
+          },
+          "White": {
+            "positive_rate": 0.44146500981033354,
+            "tpr": 0.6851351351351351,
+            "fpr": 0.21292775665399238
+          }
+        }
+      },
+      "delta_leace_minus_raw": {
+        "tpr_gap": -0.00640715342207876,
+        "fpr_gap": -0.039603960396039584,
+        "per_group": {
+          "Asian": {
+            "tpr": 0.0,
+            "fpr": 0.0
+          },
+          "Black": {
+            "tpr": -0.02985074626865669,
+            "fpr": -0.039603960396039584
+          },
+          "White": {
+            "tpr": -0.005405405405405461,
+            "fpr": 0.0
+          }
+        }
+      },
+      "fpr_gap_change_drivers": {
+        "raw_max_fpr_group": "Black",
+        "raw_min_fpr_group": "Asian",
+        "leace_max_fpr_group": "Black",
+        "leace_min_fpr_group": "Asian",
+        "largest_absolute_group_fpr_change": "Black",
+        "largest_absolute_group_fpr_change_value": -0.039603960396039584
+      }
+    },
+    "matched_sensitivity_0.80": {
+      "raw": {
+        "tpr_gap": 0.07593610892903901,
+        "fpr_gap": 0.13456829553923133,
+        "gap_groups": {
+          "tpr_max": "Asian",
+          "tpr_min": "Black",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.5443786982248521,
+            "tpr": 0.8421052631578947,
+            "fpr": 0.3010752688172043
+          },
+          "Black": {
+            "positive_rate": 0.6556291390728477,
+            "tpr": 0.7661691542288557,
+            "fpr": 0.43564356435643564
+          },
+          "White": {
+            "positive_rate": 0.5487246566383257,
+            "tpr": 0.7945945945945946,
+            "fpr": 0.3181242078580482
+          }
+        }
+      },
+      "leace": {
+        "tpr_gap": 0.06454569258968312,
+        "fpr_gap": 0.16767805812839348,
+        "gap_groups": {
+          "tpr_max": "Asian",
+          "tpr_min": "Black",
+          "fpr_max": "Black",
+          "fpr_min": "Asian"
+        },
+        "per_group": {
+          "Asian": {
+            "positive_rate": 0.5088757396449705,
+            "tpr": 0.8157894736842105,
+            "fpr": 0.25806451612903225
+          },
+          "Black": {
+            "positive_rate": 0.6423841059602649,
+            "tpr": 0.7512437810945274,
+            "fpr": 0.42574257425742573
+          },
+          "White": {
+            "positive_rate": 0.5546108567691301,
+            "tpr": 0.8013513513513514,
+            "fpr": 0.3231939163498099
+          }
+        }
+      },
+      "delta_leace_minus_raw": {
+        "tpr_gap": -0.011390416339355891,
+        "fpr_gap": 0.03310976258916215,
+        "per_group": {
+          "Asian": {
+            "tpr": -0.02631578947368418,
+            "fpr": -0.04301075268817206
+          },
+          "Black": {
+            "tpr": -0.01492537313432829,
+            "fpr": -0.00990099009900991
+          },
+          "White": {
+            "tpr": 0.006756756756756799,
+            "fpr": 0.005069708491761693
+          }
+        }
+      },
+      "fpr_gap_change_drivers": {
+        "raw_max_fpr_group": "Black",
+        "raw_min_fpr_group": "Asian",
+        "leace_max_fpr_group": "Black",
+        "leace_min_fpr_group": "Asian",
+        "largest_absolute_group_fpr_change": "Asian",
+        "largest_absolute_group_fpr_change_value": -0.04301075268817206
+      }
+    }
+  }
+}
