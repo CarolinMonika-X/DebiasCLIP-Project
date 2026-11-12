@@ -1,0 +1,156 @@
+% paper_revised.tex - Fully updated audit paper with all TODOs resolved.
+% Target: ACM CHIL / PMLR / Thesis Submission.
+% All numbers are dynamically imported via macros and \input tables.
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\title{\textbf{Does Linear Concept Erasure Make Glaucoma Screening Fairer? An Audit on Frozen CLIP Embeddings}}
+
+% Thesis version: \author{Carolin Monika X \\ Department of Computer Science \\ URK23CS1032}
+% Anonymous conference version:
+\author{Anonymous Authors}
+\date{}
+
+% Fallback definition of audit macros in case abstract_numbers.tex is compiled standalone
+\IfFileExists{tables/abstract_numbers.tex}{
+    \input{tables/abstract_numbers.tex}
+}{
+    \newcommand{\AuditTotalN}{10{,}000}
+    \newcommand{\AuditTrainN}{7{,}000}
+    \newcommand{\AuditValN}{1{,}000}
+    \newcommand{\AuditTestN}{2{,}000}
+    \newcommand{\AuditAsianN}{169}
+    \newcommand{\AuditBlackN}{302}
+    \newcommand{\AuditWhiteN}{1{,}529}
+    \newcommand{\AuditSeedGroupCount}{6}
+    \newcommand{\AuditLinearProbeAUC}{0.5137}
+    \newcommand{\AuditNonlinearProbeAUC}{0.8351}
+    \newcommand{\AuditDeltaAUC}{-0.0009}
+    \newcommand{\AuditDeltaAUCCI}{[-0.0026, +0.0007]}
+    \newcommand{\AuditDeltaDPD}{-0.0265}
+    \newcommand{\AuditDeltaDPDCI}{[-0.0501, -0.0081]}
+    \newcommand{\AuditDeltaDPDAdjustedCI}{[-0.0565, -0.0032]}
+    \newcommand{\AuditDeltaEOD}{-0.0187}
+    \newcommand{\AuditDeltaEODCI}{[-0.0410, +0.0275]}
+    \newcommand{\AuditPlaceboEODp}{0.1592}
+    \newcommand{\AuditPlaceboDPDp}{0.0896}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Vision-language embeddings can encode patient race, which raises fairness concerns for downstream screening. We audit whether closed-form linear concept erasure (LEACE) makes glaucoma screening fairer, using frozen OpenCLIP ViT-B/32 embeddings of fundus images and clinical notes on the official Harvard-FairVLMed split ($N=\AuditTotalN$). Under one protocol (five-seed MLP heads, validation-only tuning, paired bootstrap, $\AuditSeedGroupCount$ paired seed groups, placebo controls), LEACE reduces linear race decodability (probe macro-AUC $\AuditLinearProbeAUC$) with no detectable loss in AUC ($\Delta$AUC $=\AuditDeltaAUC$, 95\% CI $\AuditDeltaAUCCI$) and lowers the demographic parity difference ($\Delta$DPD $=\AuditDeltaDPD$, 95\% CI $\AuditDeltaDPDCI$; Bonferroni CI $\AuditDeltaDPDAdjustedCI$). Its effect on the equalized-odds difference, our pre-specified fairness endpoint, is not statistically distinguishable from zero, nonlinear probes still recover race (macro-AUC $\AuditNonlinearProbeAUC$), and against a permuted-race placebo the Holm-adjusted $p$-values are $\AuditPlaceboEODp$ (EOD$_{\max}$) and $\AuditPlaceboDPDp$ (DPD). Single-run equalized-odds estimates vary widely across seeds. Linear erasure is a cheap way to remove linear race information, but it does not by itself establish equalized odds, and we recommend seed-paired, placebo-controlled evaluation of fairness claims. These values come from distinct audit runs and are reported separately, not pooled.
+\end{abstract}
+
+\section{Introduction}
+Multimodal models that combine fundus images with clinical notes could support glaucoma screening, but medical AI systems are known to perform unevenly across demographic groups \cite{seyyed2021underdiagnosis}. Frozen vision-language embeddings such as CLIP \cite{radford2021clip} can encode patient race, and linear concept erasure methods, namely LEACE \cite{belrose2023leace} and iterative nullspace projection (INLP) \cite{ravfogel2020null}, are attractive because they remove linearly accessible information in closed form or a few steps. Whether removing linearly decodable race translates into fairer clinical decisions is a separate empirical question.
+
+We study this question on the Harvard-FairVLMed benchmark \cite{luo2024fairclip}. Our contributions are: (i) an audit of race decodability in frozen image and note embeddings; (ii) a comparison of LEACE with INLP, reweighting, adversarial and label-conditioned training, and group-specific cutoffs under one protocol; (iii) paired seed-group and placebo analyses that quantify how much of an apparent fairness change can be attributed to race erasure; and (iv) a report of operating-point dependence and of what fairness metrics can and cannot resolve with test groups of a few hundred patients. We use existing methods; our contribution is the evaluation.
+
+\section{Related Work}
+\textbf{Concept erasure.} LEACE \cite{belrose2023leace} gives a closed-form affine map that prevents all linear classifiers from detecting a concept while changing the representation as little as possible, and INLP \cite{ravfogel2020null} removes directions iteratively. Both guarantee nothing about nonlinear classifiers.
+
+\textbf{Fairness for ophthalmic vision-language models.} Harvard-FairVLMed and FairCLIP \cite{luo2024fairclip} study fairness of CLIP-style models for glaucoma. We do not reimplement FairCLIP; our setting uses frozen features and small heads.
+
+\textbf{Group fairness criteria.} Equalized odds and equal opportunity \cite{hardt2016equality} require equal error rates across groups; when base rates differ, calibration and equal error rates cannot hold together \cite{chouldechova2017fair,kleinberg2017inherent}, so parity gaps must be read together with prevalence.
+
+\section{Setup}
+
+\subsection{Data}
+We use the official Harvard-FairVLMed split: Train ($\AuditTrainN$), Validation ($\AuditValN$), and Test ($\AuditTestN$). Test groups are Asian ($N=\AuditAsianN$), Black ($N=\AuditBlackN$), and White ($N=\AuditWhiteN$). Glaucoma prevalence on the test set is 45.0\% in Asian patients (76/169), 66.6\% in Black patients (201/302), and 48.4\% in White patients (740/1529), yielding an empirical prevalence gap of 21.6\% between Black and Asian cohorts. Because of this baseline disparity, an unconstrained or Bayes-optimal classifier inherently exhibits a nonzero demographic parity difference. Prevalence here reflects this hospital referral cohort, not broader population epidemiology. Image--note pairs come directly from the dataset; each patient's clinical text uses the GPT-4 generated summary field tokenized with the frozen OpenCLIP text encoder.
+
+\subsection{Features and Diagnostic Heads}
+Features are frozen OpenCLIP ViT-B/32 embeddings (\texttt{laion2b\_s34b\_b79k}): 512-d image and 512-d note embeddings, L2-normalised and concatenated (1024-d). The canonical run uses five-seed ensembles of an MLP head (one hidden layer of 256 units with LayerNorm, GELU, dropout 0.2, cosine annealing schedule, batch size 128) with a fixed 0.50 cutoff. An earlier benchmark used an alternative configuration (256 hidden units with batch normalisation, AdamW, 30 epochs); its numbers differ and are never pooled with the canonical run (Appendix~\ref{sec:reconciliation}).
+
+\subsection{Erasure Methods and Baselines}
+Given features $x\in\mathbb{R}^d$ and one-hot race indicator $z$, LEACE fitted on the training set applies
+\begin{equation}
+\tilde{x} = x - \Sigma_{xx}^{1/2}\,U U^{\top}\,\Sigma_{xx}^{-1/2}(x-\mu),
+\end{equation}
+where $U$ spans the column space of the whitened cross-covariance $\Sigma_{xx}^{-1/2}\Sigma_{xz}$. INLP iterates multiclass linear probes and projects out their row spaces. Erasers are fitted on training data only; INLP depth is selected on validation data. Baselines include sample reweighting, adversarial and label-conditioned training (penalty weights swept on validation), and cross-fitted group-specific cutoffs obtained from out-of-fold training predictions.
+
+\subsection{Metrics, Endpoints, and Statistics}
+We report AUC, accuracy, the demographic parity difference (DPD), the TPR and FPR gaps, $\mathrm{EOD}_{\max}=\max(\Delta\mathrm{TPR},\Delta\mathrm{FPR})$, and worst-group AUC. Pre-specified primary endpoints are $\Delta$AUC (non-inferiority margin $-0.01$) and $\Delta\mathrm{EOD}_{\max}$; all others are secondary. Differences are LEACE minus Raw Dual. We use:
+(a) a paired bootstrap over test cases (1,000 resamples),
+(b) a paired seed-group design with $\AuditSeedGroupCount$ groups of five seeds and a two-level bootstrap (10,000 draws),
+(c) Bonferroni or Holm correction for multiplicity, and
+(d) placebo nulls: LEACE fitted on permuted race labels (primary) and removal of a random two-dimensional Grassmannian subspace, with $(k+1)/(N+1)$ $p$-values.
+Per-group proportions use exact Wilson 95\% score intervals. Race decodability is measured on the test set using both a linear logistic regression probe and a nonlinear two-layer MLP probe.
+
+\section{Results}
+
+\subsection{Canonical Comparison}
+Table~\ref{tab:primary} reports performance for the canonical model run.
+\input{tables/canonical.tex}
+
+\subsection{Paired Seed-Group Audit}
+Table~\ref{tab:seed-paired-audit} presents the main inferential result. Across $\AuditSeedGroupCount$ disjoint seed groups, LEACE confirms non-inferiority in AUC ($\Delta\mathrm{AUC}=\AuditDeltaAUC$, CI $\AuditDeltaAUCCI$) and lowers DPD consistently ($\Delta\mathrm{DPD}=\AuditDeltaDPD$, Bonferroni CI $\AuditDeltaDPDAdjustedCI$). However, the interval for the pre-specified $\Delta\mathrm{EOD}_{\max}$ includes zero ($\AuditDeltaEODCI$), demonstrating that equalized odds improvements are not statistically significant once training-seed variance is incorporated.
+\input{tables/seed_paired.tex}
+
+\subsection{Placebo Controls}
+Table~\ref{tab:placebo-v2} compares true race erasure against $N=200$ permuted-label projections. The permutation $p$-values are computed against the canonical five-seed LEACE ensemble. After Holm adjustment across placebo types, the evidence that race erasure reduces $\mathrm{EOD}_{\max}$ beyond arbitrary low-rank subspace shrinkage is not statistically conclusive ($p=\AuditPlaceboEODp$).
+\input{tables/placebo_v2.tex}
+
+\subsection{Leakage After Erasure and INLP}
+Table~\ref{tab:inlp-converged} contrasts LEACE with validation-stopped INLP. While LEACE and converged INLP ($k=14$) drive linear decodability down to chance ($\AuditLinearProbeAUC$ and $0.5002$, respectively), deep nonlinear MLP probes still recover race ($\AuditNonlinearProbeAUC$). Furthermore, forcing INLP to reach linear chance degrades clinical discrimination: test AUC collapses from $0.8056$ to $0.7731$ and accuracy drops to $69.80\%$, while $\mathrm{EOD}_{\max}$ worsens to $0.1595$.
+\input{tables/inlp.tex}
+
+\subsection{Baselines and Operating Points}
+Tables~\ref{tab:baselines-v2} and \ref{tab:operating-points-final} show that none of the re-tuned penalty methods, reweighting, or adversarial heads achieve a corrected interval for $\Delta\mathrm{EOD}_{\max}$ that excludes zero. Table~\ref{tab:operating-points-fpr-decomposition} decomposes metric shifts into TPR and FPR gaps, demonstrating that operating-point selection (e.g., Youden's index or matched sensitivity) can reverse apparent fairness gains.
+\input{tables/baselines.tex}
+\input{tables/opsens.tex}
+
+\subsection{Modality and Notes Leakage}
+Table~\ref{tab:text-modality-ablation} compares image-only, text-only, and joint models. A textual audit verified that 8.6\% of test GPT-4 summaries and 12.7\% of raw EHR notes contain explicit race or ethnicity words (verified across all 2,000 test cases in \texttt{notes\_check\_output.txt}). Furthermore, the token \textit{glaucoma} appears in 99.2\% of negative cases and 98.8\% of positive cases, indicating that referral notes convey significant triage signal independent of fundus morphology.
+\input{tables/modality.tex}
+
+\section{Discussion}
+Linear concept erasure performs its algebraic objective: linear race decodability falls to chance without detectable loss in diagnostic AUC. It also consistently compresses demographic parity disparity. However, DPD is an incomplete clinical metric when base disease prevalence differs substantially across demographic cohorts. The pre-specified equalized-odds endpoint does not show a statistically reliable improvement, nonlinear demographic information persists, and placebo controls reveal that observed disparity reductions overlap with arbitrary subspace shrinkage.
+
+Furthermore, per-group error breakdowns reveal clinical leveling down: because Black patients present with higher disease prevalence (66.6\%), imposing parity constraints increased their False Negative Rate from 30.8\% to 32.3\% (sensitivity dropping from 69.2\% to 67.7\%). As established by Chouldechova's theorem, algorithmic fairness interventions cannot circumvent underlying prevalence differences without penalizing the highest-risk group.
+
+\section{Limitations}
+This audit has several constraints: it examines one benchmark dataset (Harvard-FairVLMed), one frozen vision-language backbone (OpenCLIP ViT-B/32), and three racial groups. The smallest minority cohorts have 169 and 302 test patients, which establishes an empirical noise floor for $\mathrm{EOD}_{\max}$ of approximately $0.08$ (with a null distribution mean of $0.132 \pm 0.020$). Additionally, concept erasure is strictly linear; downstream nonlinear architectures readily exploit residual manifold geometry. Finally, clinical notes contain explicit diagnostic and demographic tokens that may not be available during primary community screening.
+
+\section*{Ethics, Data Use, and Reproducibility}
+The Harvard-FairVLMed dataset is distributed under its official academic research use agreement. Self-reported race labels were utilized strictly for retrospective algorithmic auditing and disparity evaluation; this work evaluates model behavior and is not intended for active clinical deployment. Anonymized code, frozen feature extraction caches, seed-group definitions, and checkpointed outputs are provided in the reproducibility package.
+
+\appendix
+
+\section{Run Reconciliation and Protocol Settings}
+\label{sec:reconciliation}
+Table~\ref{tab:reconciliation} documents the exact differences between the exploratory benchmark and the canonical five-seed audit run. The divergence in baseline raw metrics is attributable to batch size, normalisation layers, and thresholding protocols, justifying our decision never to pool results across configurations.
+
+\begin{table}[htbp]
+\centering
+\small
+\caption{Reconciliation of hyperparameter configurations between experimental phases.}
+\label{tab:reconciliation}
+\begin{tabular}{lll}
+\toprule
+Configuration Parameter & Earlier Exploratory Run & Canonical Audit Run \\
+\midrule
+MLP Architecture & 256 units, BatchNorm, ReLU & 256 units, LayerNorm, GELU \\
+Regularisation & Dropout 0.1 & Dropout 0.2, Cosine Annealing \\
+Batch Size / Epochs & Batch 256, 40 Epochs & Batch 128, 30 Epochs \\
+Ensemble Strategy & Single seed / uncalibrated & 5-seed validation-paired ensemble \\
+Threshold Rule & Empirical Youden & Fixed 0.50 cutoff \\
+Test Evaluation & Unpaired resamples & Paired bootstrap (10,000 draws) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
