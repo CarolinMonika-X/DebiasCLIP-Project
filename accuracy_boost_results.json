@@ -1,0 +1,9 @@
+{
+  "model": "RETFound + U-Net CDR Biomarkers + Text",
+  "test_auc": 0.9390523861395943,
+  "test_accuracy": 0.864,
+  "test_sensitivity": 0.8770894788593904,
+  "test_specificity": 0.8504577822990844,
+  "gain_auc": 0.12535238613959432,
+  "gain_accuracy": 0.127
+}

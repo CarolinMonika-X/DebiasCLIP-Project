@@ -1,0 +1,442 @@
+{
+  "config": {
+    "split_sizes": {
+      "train": 50,
+      "val": 50,
+      "test": 50
+    },
+    "folds": 5,
+    "mlp_seeds": [
+      0,
+      100,
+      200,
+      300,
+      400
+    ],
+    "mlp_epochs": 30,
+    "batch_size": 128,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "cv": "StratifiedKFold(shuffle=True, random_state=0), train rows only",
+    "test_evaluation_after_validation_selection": true,
+    "stack_test_probabilities_file": "stack_test_probs_smoke.npy",
+    "stack_validation_probabilities_file": "stack_val_probs_smoke.npy",
+    "test_probabilities_file": "stack_plus_test_probs_smoke.npy",
+    "base_test_probabilities_file": "stack_base_test_probs_smoke.npz",
+    "fine_tuned_probability_files": [
+      "ft_probs.npz",
+      "ft_probs_s1.npz",
+      "ft_probs_s2.npz"
+    ],
+    "fine_tuned_ensemble": "arithmetic mean of val/test probabilities",
+    "mask_level": 2,
+    "mask_level_0_regex": "\\b(?:asian(?:[\\s-]+american)?|black|white|caucasian|african(?:[\\s-]+american)?|hispanic|latino|latina|latinx|indigenous|native[\\s-]+american|race|racial|ethnic\\w*)\\b",
+    "mask_level_2_additional_regex": "glaucoma\\w*|trabecul\\w*|laser|slt|surger\\w*|surgical|drops?|latanoprost|timolol|brimonidine|dorzolamide|travoprost|bimatoprost|cosopt|combigan|lumigan|xalatan|rhopressa|netarsudil|medication\\w*|tube|shunt|iop|pressure|diagnos\\w*|suspect\\w*|dx|referr\\w*|evaluat\\w*|screen\\w*|follow[- ]?up|rule[sd]? out|r/o",
+    "text_mask_regex": "(?:\\b(?:asian(?:[\\s-]+american)?|black|white|caucasian|african(?:[\\s-]+american)?|hispanic|latino|latina|latinx|indigenous|native[\\s-]+american|race|racial|ethnic\\w*)\\b)|(?:glaucoma\\w*|trabecul\\w*|laser|slt|surger\\w*|surgical|drops?|latanoprost|timolol|brimonidine|dorzolamide|travoprost|bimatoprost|cosopt|combigan|lumigan|xalatan|rhopressa|netarsudil|medication\\w*|tube|shunt|iop|pressure|diagnos\\w*|suspect\\w*|dx|referr\\w*|evaluat\\w*|screen\\w*|follow[- ]?up|rule[sd]? out|r/o)",
+    "limit": 50
+  },
+  "existing_stack": {
+    "base_models": {
+      "openclip_joint": {
+        "feature_config": "OpenCLIP img + OpenCLIP txt",
+        "training_protocol": "five-fold stratified OOF; 5-seed ensemble per fold; 5-seed full-TRAIN ensemble",
+        "validation": {
+          "auc": 0.6141215106732348,
+          "accuracy_at_0_5": 0.56,
+          "accuracy_at_val_youden": 0.56
+        },
+        "test": {
+          "auc": 0.7191558441558442,
+          "accuracy_at_0_5": 0.68,
+          "accuracy_at_val_youden": 0.68
+        }
+      },
+      "biomedclip_joint": {
+        "feature_config": "BiomedCLIP img + BiomedCLIP txt",
+        "training_protocol": "five-fold stratified OOF; 5-seed ensemble per fold; 5-seed full-TRAIN ensemble",
+        "validation": {
+          "auc": 0.6223316912972086,
+          "accuracy_at_0_5": 0.62,
+          "accuracy_at_val_youden": 0.62
+        },
+        "test": {
+          "auc": 0.6558441558441559,
+          "accuracy_at_0_5": 0.62,
+          "accuracy_at_val_youden": 0.62
+        }
+      },
+      "text_tfidf": {
+        "feature_config": "mask-level-2 TF-IDF of gpt4_summary + note",
+        "training_protocol": "five-fold stratified OOF; fixed C=1.0 logistic regression",
+        "validation": {
+          "auc": 0.45977011494252873,
+          "accuracy_at_0_5": 0.46,
+          "accuracy_at_val_youden": 0.48
+        },
+        "test": {
+          "auc": 0.612012987012987,
+          "accuracy_at_0_5": 0.54,
+          "accuracy_at_val_youden": 0.56
+        }
+      },
+      "stack": {
+        "feature_config": "logistic regression over 3 base OOF probabilities",
+        "selected_meta_C": 0.01,
+        "validation_C_sweep": [
+          {
+            "C": 0.01,
+            "val_auc": 0.6305418719211823
+          },
+          {
+            "C": 0.1,
+            "val_auc": 0.6272577996715928
+          },
+          {
+            "C": 1.0,
+            "val_auc": 0.625615763546798
+          },
+          {
+            "C": 10.0,
+            "val_auc": 0.6239737274220033
+          },
+          {
+            "C": 100.0,
+            "val_auc": 0.6157635467980296
+          }
+        ],
+        "validation_threshold": {
+          "rule": "Youden J maximized on validation; ties nearest 0.5",
+          "value": 0.5029710588402756
+        },
+        "validation": {
+          "auc": 0.6305418719211823,
+          "accuracy_at_0_5": 0.58,
+          "accuracy_at_val_youden": 0.66
+        },
+        "test": {
+          "auc": 0.6996753246753247,
+          "accuracy_at_0_5": 0.66,
+          "accuracy_at_val_youden": 0.62
+        }
+      }
+    },
+    "skipped_image_variant_caches": [
+      "cached_features_OLD_blackimages.pt: excluded legacy/non-variant cache"
+    ]
+  },
+  "final_blend_selection": {
+    "space": "logit",
+    "weight_on_stack": 0.9,
+    "validation_auc_by_weight": [
+      {
+        "weight_on_stack": 0.0,
+        "val_auc": 0.8045977011494253
+      },
+      {
+        "weight_on_stack": 0.1,
+        "val_auc": 0.8045977011494253
+      },
+      {
+        "weight_on_stack": 0.2,
+        "val_auc": 0.8045977011494253
+      },
+      {
+        "weight_on_stack": 0.3,
+        "val_auc": 0.8045977011494253
+      },
+      {
+        "weight_on_stack": 0.4,
+        "val_auc": 0.80623973727422
+      },
+      {
+        "weight_on_stack": 0.5,
+        "val_auc": 0.80623973727422
+      },
+      {
+        "weight_on_stack": 0.6,
+        "val_auc": 0.80623973727422
+      },
+      {
+        "weight_on_stack": 0.7,
+        "val_auc": 0.8095238095238095
+      },
+      {
+        "weight_on_stack": 0.8,
+        "val_auc": 0.812807881773399
+      },
+      {
+        "weight_on_stack": 0.9,
+        "val_auc": 0.812807881773399
+      },
+      {
+        "weight_on_stack": 1.0,
+        "val_auc": 0.6305418719211823
+      }
+    ],
+    "weight_selection_rule": "Highest validation AUC; ties favor larger weight on stack.",
+    "threshold": 0.509925257555834,
+    "threshold_selection_rule": "Validation Youden J; ties nearest 0.5."
+  },
+  "models": {
+    "openclip_joint": {
+      "label": "OpenCLIP MLP baseline",
+      "validation_threshold": 0.6898812055587769,
+      "validation": {
+        "auc": 0.6141215106732348,
+        "accuracy": 0.64,
+        "accuracy_at_0_5": 0.56
+      },
+      "test": {
+        "auc": 0.7191558441558442,
+        "accuracy": 0.68,
+        "accuracy_at_0_5": 0.68
+      }
+    },
+    "text_tfidf": {
+      "label": "Mask-2 TF-IDF alone",
+      "validation_threshold": 0.38771723294727256,
+      "validation": {
+        "auc": 0.45977011494252873,
+        "accuracy": 0.48,
+        "accuracy_at_0_5": 0.46
+      },
+      "test": {
+        "auc": 0.612012987012987,
+        "accuracy": 0.58,
+        "accuracy_at_0_5": 0.54
+      }
+    },
+    "stack": {
+      "label": "Mask-2 TF-IDF + base-model stack",
+      "validation_threshold": 0.5029710588402756,
+      "validation": {
+        "auc": 0.6305418719211823,
+        "accuracy": 0.66,
+        "accuracy_at_0_5": 0.58
+      },
+      "test": {
+        "auc": 0.6996753246753247,
+        "accuracy": 0.62,
+        "accuracy_at_0_5": 0.66
+      }
+    },
+    "ft_image": {
+      "label": "ft_image alone",
+      "validation_threshold": 0.5707569519678751,
+      "validation": {
+        "auc": 0.8045977011494253,
+        "accuracy": 0.78,
+        "accuracy_at_0_5": 0.76
+      },
+      "test": {
+        "auc": 0.9285714285714286,
+        "accuracy": 0.86,
+        "accuracy_at_0_5": 0.86
+      }
+    },
+    "final_blend": {
+      "label": "Final logit-space blend",
+      "validation_threshold": 0.509925257555834,
+      "validation": {
+        "auc": 0.812807881773399,
+        "accuracy": 0.8,
+        "accuracy_at_0_5": 0.74
+      },
+      "test": {
+        "auc": 0.9253246753246753,
+        "accuracy": 0.88,
+        "accuracy_at_0_5": 0.84
+      }
+    }
+  },
+  "paired_bootstrap": {
+    "final_minus_stack": {
+      "auc": {
+        "delta": 0.22564935064935066,
+        "percentile_2_5": 0.09842685342388222,
+        "percentile_97_5": 0.36675058056710175,
+        "resamples": 1000,
+        "seed": 0
+      },
+      "accuracy": {
+        "delta": 0.26,
+        "percentile_2_5": 0.14,
+        "percentile_97_5": 0.38,
+        "resamples": 1000,
+        "seed": 0
+      },
+      "dpd": {
+        "delta": -0.14845938375350137,
+        "percentile_2_5": -0.47058823529411764,
+        "percentile_97_5": 0.28214285714285703,
+        "resamples": 1000,
+        "seed": 0
+      },
+      "eod_max": {
+        "delta": -0.2666666666666666,
+        "percentile_2_5": -0.6666666666666666,
+        "percentile_97_5": 0.46184210526315767,
+        "resamples": 1000,
+        "seed": 0
+      }
+    },
+    "final_minus_openclip_joint": {
+      "auc": {
+        "delta": 0.2061688311688311,
+        "percentile_2_5": 0.08011990662139223,
+        "percentile_97_5": 0.35243389423076926,
+        "resamples": 1000,
+        "seed": 0
+      },
+      "accuracy": {
+        "delta": 0.19999999999999996,
+        "percentile_2_5": 0.07999999999999996,
+        "percentile_97_5": 0.32000000000000006,
+        "resamples": 1000,
+        "seed": 0
+      },
+      "dpd": {
+        "delta": 0.11624649859943981,
+        "percentile_2_5": -0.3334415584415585,
+        "percentile_97_5": 0.42501689189189185,
+        "resamples": 1000,
+        "seed": 0
+      },
+      "eod_max": {
+        "delta": -0.1333333333333332,
+        "percentile_2_5": -0.6666666666666666,
+        "percentile_97_5": 0.4273809523809523,
+        "resamples": 1000,
+        "seed": 0
+      }
+    }
+  },
+  "per_race_test_rates": {
+    "stack": {
+      "Asian": {
+        "n": 7,
+        "positive_n": 3,
+        "negative_n": 4,
+        "tpr": 0.0,
+        "tpr_wilson_95_ci": [
+          0.0,
+          0.5615060804490177
+        ],
+        "fnr": 1.0,
+        "fnr_wilson_95_ci": [
+          0.43849391955098227,
+          1.0
+        ],
+        "fpr": 0.0,
+        "fpr_wilson_95_ci": [
+          0.0,
+          0.48990002040399916
+        ]
+      },
+      "Black": {
+        "n": 9,
+        "positive_n": 5,
+        "negative_n": 4,
+        "tpr": 0.4,
+        "tpr_wilson_95_ci": [
+          0.1176182311592533,
+          0.769280067791163
+        ],
+        "fnr": 0.6,
+        "fnr_wilson_95_ci": [
+          0.23071993220883708,
+          0.8823817688407467
+        ],
+        "fpr": 0.25,
+        "fpr_wilson_95_ci": [
+          0.045586062644636216,
+          0.6993639475573634
+        ]
+      },
+      "White": {
+        "n": 34,
+        "positive_n": 20,
+        "negative_n": 14,
+        "tpr": 0.4,
+        "tpr_wilson_95_ci": [
+          0.21880396741419272,
+          0.613422057684794
+        ],
+        "fnr": 0.6,
+        "fnr_wilson_95_ci": [
+          0.3865779423152061,
+          0.7811960325858074
+        ],
+        "fpr": 0.0,
+        "fpr_wilson_95_ci": [
+          0.0,
+          0.21531701192718142
+        ]
+      }
+    },
+    "final_blend": {
+      "Asian": {
+        "n": 7,
+        "positive_n": 3,
+        "negative_n": 4,
+        "tpr": 0.6666666666666666,
+        "tpr_wilson_95_ci": [
+          0.2076549551264879,
+          0.9385096847238394
+        ],
+        "fnr": 0.3333333333333333,
+        "fnr_wilson_95_ci": [
+          0.0614903152761605,
+          0.7923450448735121
+        ],
+        "fpr": 0.0,
+        "fpr_wilson_95_ci": [
+          0.0,
+          0.48990002040399916
+        ]
+      },
+      "Black": {
+        "n": 9,
+        "positive_n": 5,
+        "negative_n": 4,
+        "tpr": 0.8,
+        "tpr_wilson_95_ci": [
+          0.3755282641185388,
+          0.9637768390302125
+        ],
+        "fnr": 0.2,
+        "fnr_wilson_95_ci": [
+          0.03622316096978745,
+          0.6244717358814613
+        ],
+        "fpr": 0.0,
+        "fpr_wilson_95_ci": [
+          0.0,
+          0.48990002040399916
+        ]
+      },
+      "White": {
+        "n": 34,
+        "positive_n": 20,
+        "negative_n": 14,
+        "tpr": 0.8,
+        "tpr_wilson_95_ci": [
+          0.5839782779742401,
+          0.9193436467288
+        ],
+        "fnr": 0.2,
+        "fnr_wilson_95_ci": [
+          0.0806563532712,
+          0.41602172202575993
+        ],
+        "fpr": 0.0,
+        "fpr_wilson_95_ci": [
+          0.0,
+          0.21531701192718142
+        ]
+      }
+    }
+  }
+}

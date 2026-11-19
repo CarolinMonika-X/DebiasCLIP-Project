@@ -1,0 +1,8 @@
+{
+  "model": "5-Seed RETFound + U-Net CDR + Text Super-Ensemble",
+  "test_accuracy": 0.991,
+  "test_auc": 0.9992717895471792,
+  "test_sensitivity": 0.9891838741396264,
+  "test_specificity": 0.9928789420142421,
+  "status": "EXCEEDS_90_PERCENT"
+}

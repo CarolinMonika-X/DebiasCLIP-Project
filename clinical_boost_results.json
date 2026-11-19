@@ -1,0 +1,9 @@
+{
+  "model": "HistGradientBoosting Multimodal CLIP + Calibrated Threshold",
+  "test_auc": 0.7753720825318517,
+  "test_accuracy_calibrated": 0.7005,
+  "test_accuracy_05": 0.7045,
+  "sensitivity": 0.6823992133726647,
+  "specificity": 0.7192268565615463,
+  "threshold": 0.5262194490209645
+}

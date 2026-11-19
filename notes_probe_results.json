@@ -1,0 +1,890 @@
+{
+  "seed": 42,
+  "split": {
+    "method": "torch.utils.data.random_split over HF train row indices",
+    "sizes": {
+      "train": 7000,
+      "val": 1000,
+      "test": 2000
+    },
+    "test_access_deferred_until_final_evaluation": true
+  },
+  "feature_config": {
+    "fields": [
+      "gpt4_summary",
+      "note"
+    ],
+    "vectorizer": "TF-IDF",
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 3,
+    "max_features": 50000,
+    "race_words_removed": [
+      "asian(?:[\\s-]+american)?",
+      "black",
+      "white",
+      "caucasian",
+      "african(?:[\\s-]+american)?",
+      "hispanic",
+      "latino",
+      "latina",
+      "latinx",
+      "indigenous",
+      "native[\\s-]+american",
+      "race",
+      "racial",
+      "ethnic(?:ity)?"
+    ],
+    "classifier": "binary LogisticRegression, liblinear, max_iter=3000",
+    "C_values": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "fit_policy": "vectorizer and classifiers fit on TRAIN rows only",
+    "selection_policy": "choose C by VALIDATION ROC AUC"
+  },
+  "train_note_keyword_frequencies": {
+    "cup": {
+      "positive": {
+        "count": 187,
+        "total": 3556,
+        "fraction": 0.05258717660292463
+      },
+      "negative": {
+        "count": 340,
+        "total": 3444,
+        "fraction": 0.09872241579558652
+      }
+    },
+    "c/d": {
+      "positive": {
+        "count": 230,
+        "total": 3556,
+        "fraction": 0.06467941507311586
+      },
+      "negative": {
+        "count": 535,
+        "total": 3444,
+        "fraction": 0.15534262485481998
+      }
+    },
+    "cup-to-disc": {
+      "positive": {
+        "count": 49,
+        "total": 3556,
+        "fraction": 0.013779527559055118
+      },
+      "negative": {
+        "count": 99,
+        "total": 3444,
+        "fraction": 0.028745644599303136
+      }
+    },
+    "IOP": {
+      "positive": {
+        "count": 1586,
+        "total": 3556,
+        "fraction": 0.44600674915635546
+      },
+      "negative": {
+        "count": 1731,
+        "total": 3444,
+        "fraction": 0.5026132404181185
+      }
+    },
+    "intraocular": {
+      "positive": {
+        "count": 547,
+        "total": 3556,
+        "fraction": 0.15382452193475815
+      },
+      "negative": {
+        "count": 361,
+        "total": 3444,
+        "fraction": 0.10481997677119628
+      }
+    },
+    "pressure": {
+      "positive": {
+        "count": 745,
+        "total": 3556,
+        "fraction": 0.20950506186726658
+      },
+      "negative": {
+        "count": 564,
+        "total": 3444,
+        "fraction": 0.16376306620209058
+      }
+    },
+    "visual field": {
+      "positive": {
+        "count": 802,
+        "total": 3556,
+        "fraction": 0.22553430821147358
+      },
+      "negative": {
+        "count": 584,
+        "total": 3444,
+        "fraction": 0.16957026713124274
+      }
+    },
+    "RNFL": {
+      "positive": {
+        "count": 1014,
+        "total": 3556,
+        "fraction": 0.28515185601799775
+      },
+      "negative": {
+        "count": 1146,
+        "total": 3444,
+        "fraction": 0.3327526132404181
+      }
+    },
+    "OCT": {
+      "positive": {
+        "count": 1623,
+        "total": 3556,
+        "fraction": 0.45641169853768276
+      },
+      "negative": {
+        "count": 2149,
+        "total": 3444,
+        "fraction": 0.6239837398373984
+      }
+    },
+    "thinning": {
+      "positive": {
+        "count": 774,
+        "total": 3556,
+        "fraction": 0.21766029246344207
+      },
+      "negative": {
+        "count": 739,
+        "total": 3444,
+        "fraction": 0.2145760743321719
+      }
+    },
+    "optic nerve": {
+      "positive": {
+        "count": 716,
+        "total": 3556,
+        "fraction": 0.2013498312710911
+      },
+      "negative": {
+        "count": 721,
+        "total": 3444,
+        "fraction": 0.20934959349593496
+      }
+    },
+    "suspect": {
+      "positive": {
+        "count": 642,
+        "total": 3556,
+        "fraction": 0.18053993250843645
+      },
+      "negative": {
+        "count": 1275,
+        "total": 3444,
+        "fraction": 0.3702090592334495
+      }
+    },
+    "diagnos": {
+      "positive": {
+        "count": 823,
+        "total": 3556,
+        "fraction": 0.2314398200224972
+      },
+      "negative": {
+        "count": 745,
+        "total": 3444,
+        "fraction": 0.21631823461091754
+      }
+    },
+    "treat": {
+      "positive": {
+        "count": 450,
+        "total": 3556,
+        "fraction": 0.1265466816647919
+      },
+      "negative": {
+        "count": 444,
+        "total": 3444,
+        "fraction": 0.1289198606271777
+      }
+    },
+    "drops": {
+      "positive": {
+        "count": 593,
+        "total": 3556,
+        "fraction": 0.16676040494938132
+      },
+      "negative": {
+        "count": 404,
+        "total": 3444,
+        "fraction": 0.1173054587688734
+      }
+    },
+    "surgery": {
+      "positive": {
+        "count": 759,
+        "total": 3556,
+        "fraction": 0.21344206974128235
+      },
+      "negative": {
+        "count": 427,
+        "total": 3444,
+        "fraction": 0.12398373983739837
+      }
+    },
+    "family history": {
+      "positive": {
+        "count": 450,
+        "total": 3556,
+        "fraction": 0.1265466816647919
+      },
+      "negative": {
+        "count": 636,
+        "total": 3444,
+        "fraction": 0.18466898954703834
+      }
+    }
+  },
+  "fields": {
+    "gpt4_summary": {
+      "selected_C": 1.0,
+      "C_selection_metric": "validation ROC AUC; ties favor smaller C",
+      "validation_auc_by_C": [
+        {
+          "C": 0.01,
+          "val_auc": 0.7791919799498747
+        },
+        {
+          "C": 0.1,
+          "val_auc": 0.7982075187969925
+        },
+        {
+          "C": 1.0,
+          "val_auc": 0.8179167919799499
+        },
+        {
+          "C": 10.0,
+          "val_auc": 0.7987969924812031
+        },
+        {
+          "C": 100.0,
+          "val_auc": 0.7752380952380952
+        }
+      ],
+      "validation_auc": 0.8179167919799499,
+      "vocabulary_size": 13613,
+      "top_30_coefficients": {
+        "positive": [
+          {
+            "term": "with glaucoma",
+            "coefficient": 3.539435172251172
+          },
+          {
+            "term": "severe",
+            "coefficient": 2.988122315669007
+          },
+          {
+            "term": "female diagnosed",
+            "coefficient": 2.6281558035183283
+          },
+          {
+            "term": "male diagnosed",
+            "coefficient": 2.540405835831942
+          },
+          {
+            "term": "diagnosed with",
+            "coefficient": 2.535322549843696
+          },
+          {
+            "term": "bilateral",
+            "coefficient": 1.7911910964644295
+          },
+          {
+            "term": "optic neuropathy",
+            "coefficient": 1.6487429653535923
+          },
+          {
+            "term": "diabetes",
+            "coefficient": 1.600715902456965
+          },
+          {
+            "term": "patient has",
+            "coefficient": 1.5962393874218122
+          },
+          {
+            "term": "left",
+            "coefficient": 1.5727675645937562
+          },
+          {
+            "term": "defect",
+            "coefficient": 1.5652595630154544
+          },
+          {
+            "term": "surgery",
+            "coefficient": 1.5638142361618415
+          },
+          {
+            "term": "trabeculectomy",
+            "coefficient": 1.5165399885630761
+          },
+          {
+            "term": "macular",
+            "coefficient": 1.5103084125302577
+          },
+          {
+            "term": "advanced",
+            "coefficient": 1.5074241420205734
+          },
+          {
+            "term": "pseudophakia",
+            "coefficient": 1.50283937975628
+          },
+          {
+            "term": "defects",
+            "coefficient": 1.489984946825041
+          },
+          {
+            "term": "neuropathy",
+            "coefficient": 1.4634969881430693
+          },
+          {
+            "term": "diagnosed",
+            "coefficient": 1.4425787060350543
+          },
+          {
+            "term": "latanoprost",
+            "coefficient": 1.368027550531087
+          },
+          {
+            "term": "stroke",
+            "coefficient": 1.3626452131044895
+          },
+          {
+            "term": "person",
+            "coefficient": 1.3608066305932787
+          },
+          {
+            "term": "retinopathy",
+            "coefficient": 1.3485834681875641
+          },
+          {
+            "term": "may",
+            "coefficient": 1.3084508228514826
+          },
+          {
+            "term": "has glaucoma",
+            "coefficient": 1.275719324803333
+          },
+          {
+            "term": "worsening",
+            "coefficient": 1.2747891774825095
+          },
+          {
+            "term": "diabetic",
+            "coefficient": 1.261433809077212
+          },
+          {
+            "term": "moderate",
+            "coefficient": 1.259864122741204
+          },
+          {
+            "term": "and",
+            "coefficient": 1.259387240511562
+          },
+          {
+            "term": "homonymous",
+            "coefficient": 1.2555009368466639
+          }
+        ],
+        "negative": [
+          {
+            "term": "no",
+            "coefficient": -3.5324340694480605
+          },
+          {
+            "term": "normal",
+            "coefficient": -3.199622370080193
+          },
+          {
+            "term": "diagnosis",
+            "coefficient": -2.9508785818357217
+          },
+          {
+            "term": "no glaucoma",
+            "coefficient": -2.625642158080568
+          },
+          {
+            "term": "mild",
+            "coefficient": -2.3541478915044545
+          },
+          {
+            "term": "no diagnosis",
+            "coefficient": -2.21439798852489
+          },
+          {
+            "term": "diagnosis of",
+            "coefficient": -2.200627686027916
+          },
+          {
+            "term": "cupping",
+            "coefficient": -2.024639224968444
+          },
+          {
+            "term": "full",
+            "coefficient": -1.947569586794305
+          },
+          {
+            "term": "glaucoma suspect",
+            "coefficient": -1.9315461487652579
+          },
+          {
+            "term": "suspect",
+            "coefficient": -1.8845618110602322
+          },
+          {
+            "term": "asymmetry",
+            "coefficient": -1.8459914469214742
+          },
+          {
+            "term": "family",
+            "coefficient": -1.8410078026682144
+          },
+          {
+            "term": "has mild",
+            "coefficient": -1.7465927837152186
+          },
+          {
+            "term": "migraines",
+            "coefficient": -1.730969929162553
+          },
+          {
+            "term": "female with",
+            "coefficient": -1.684383684397698
+          },
+          {
+            "term": "family history",
+            "coefficient": -1.6808241617854829
+          },
+          {
+            "term": "ocular",
+            "coefficient": -1.5309024053924691
+          },
+          {
+            "term": "without",
+            "coefficient": -1.523831923547417
+          },
+          {
+            "term": "have glaucoma",
+            "coefficient": -1.4955231318316706
+          },
+          {
+            "term": "suspected",
+            "coefficient": -1.4852340407993925
+          },
+          {
+            "term": "normal visual",
+            "coefficient": -1.4072233953039586
+          },
+          {
+            "term": "of glaucoma",
+            "coefficient": -1.4025347010768574
+          },
+          {
+            "term": "history",
+            "coefficient": -1.3847045338797586
+          },
+          {
+            "term": "female",
+            "coefficient": -1.3755015318717712
+          },
+          {
+            "term": "glaucoma diagnosis",
+            "coefficient": -1.3714945908612397
+          },
+          {
+            "term": "trauma",
+            "coefficient": -1.3703862647794092
+          },
+          {
+            "term": "of",
+            "coefficient": -1.3676250098242304
+          },
+          {
+            "term": "sclerosis",
+            "coefficient": -1.3656437096395262
+          },
+          {
+            "term": "risk",
+            "coefficient": -1.3618659027935964
+          }
+        ]
+      },
+      "top_direct_diagnosis_terms": [
+        {
+          "direction": "positive",
+          "term": "with glaucoma",
+          "coefficient": 3.539435172251172
+        },
+        {
+          "direction": "positive",
+          "term": "diagnosed with",
+          "coefficient": 2.535322549843696
+        },
+        {
+          "direction": "positive",
+          "term": "has glaucoma",
+          "coefficient": 1.275719324803333
+        },
+        {
+          "direction": "negative",
+          "term": "no glaucoma",
+          "coefficient": -2.625642158080568
+        },
+        {
+          "direction": "negative",
+          "term": "diagnosis of",
+          "coefficient": -2.200627686027916
+        },
+        {
+          "direction": "negative",
+          "term": "glaucoma suspect",
+          "coefficient": -1.9315461487652579
+        },
+        {
+          "direction": "negative",
+          "term": "have glaucoma",
+          "coefficient": -1.4955231318316706
+        },
+        {
+          "direction": "negative",
+          "term": "of glaucoma",
+          "coefficient": -1.4025347010768574
+        },
+        {
+          "direction": "negative",
+          "term": "glaucoma diagnosis",
+          "coefficient": -1.3714945908612397
+        }
+      ],
+      "diagnosis_term_definition": "TF-IDF features containing glaucoma/glaucomatous, or the direct diagnosis fragments diagnosed/diagnosis with/of.",
+      "validation_auc_without_diagnosis_terms": 0.818101253132832,
+      "diagnosis_vocabulary_terms_removed": 458
+    },
+    "note": {
+      "selected_C": 10.0,
+      "C_selection_metric": "validation ROC AUC; ties favor smaller C",
+      "validation_auc_by_C": [
+        {
+          "C": 0.01,
+          "val_auc": 0.7983077694235589
+        },
+        {
+          "C": 0.1,
+          "val_auc": 0.835143859649123
+        },
+        {
+          "C": 1.0,
+          "val_auc": 0.8728140350877192
+        },
+        {
+          "C": 10.0,
+          "val_auc": 0.8735558897243108
+        },
+        {
+          "C": 100.0,
+          "val_auc": 0.8611167919799498
+        }
+      ],
+      "validation_auc": 0.8735558897243108,
+      "vocabulary_size": 45805,
+      "top_30_coefficients": {
+        "positive": [
+          {
+            "term": "arcuate",
+            "coefficient": 7.2391857830790185
+          },
+          {
+            "term": "superior",
+            "coefficient": 6.779893418540828
+          },
+          {
+            "term": "defects",
+            "coefficient": 5.984607504228566
+          },
+          {
+            "term": "unreliable",
+            "coefficient": 5.7125081999282745
+          },
+          {
+            "term": "rim",
+            "coefficient": 5.577616413594758
+          },
+          {
+            "term": "depression",
+            "coefficient": 5.263275110143643
+          },
+          {
+            "term": "artifact",
+            "coefficient": 5.155378573272723
+          },
+          {
+            "term": "homonymous",
+            "coefficient": 4.821818881511553
+          },
+          {
+            "term": "evaluated and",
+            "coefficient": 4.6246610703176785
+          },
+          {
+            "term": "severe",
+            "coefficient": 4.608661666849249
+          },
+          {
+            "term": "was evaluated",
+            "coefficient": 4.573931584789016
+          },
+          {
+            "term": "superior arcuate",
+            "coefficient": 4.467496767270903
+          },
+          {
+            "term": "changes",
+            "coefficient": 4.425346772160787
+          },
+          {
+            "term": "evaluated",
+            "coefficient": 4.08571463695251
+          },
+          {
+            "term": "and diagnosed",
+            "coefficient": 3.960852881535933
+          },
+          {
+            "term": "macular",
+            "coefficient": 3.812408660978865
+          },
+          {
+            "term": "generalized",
+            "coefficient": 3.7649187221044462
+          },
+          {
+            "term": "surgery",
+            "coefficient": 3.7171239624959718
+          },
+          {
+            "term": "generalized depression",
+            "coefficient": 3.672550075119255
+          },
+          {
+            "term": "hvf with",
+            "coefficient": 3.610760095846267
+          },
+          {
+            "term": "worse",
+            "coefficient": 3.54371616322831
+          },
+          {
+            "term": "defect",
+            "coefficient": 3.5311988489060973
+          },
+          {
+            "term": "with glaucoma",
+            "coefficient": 3.520113875597271
+          },
+          {
+            "term": "bgi",
+            "coefficient": 3.457168087604365
+          },
+          {
+            "term": "dense",
+            "coefficient": 3.426623511519946
+          },
+          {
+            "term": "optic neuropathy",
+            "coefficient": 3.395354723441903
+          },
+          {
+            "term": "neuropathy",
+            "coefficient": 3.29863372778283
+          },
+          {
+            "term": "for date_time",
+            "coefficient": 3.2881114330510184
+          },
+          {
+            "term": "eyes date_time",
+            "coefficient": 3.231750431818604
+          },
+          {
+            "term": "field",
+            "coefficient": 3.1992565025572377
+          }
+        ],
+        "negative": [
+          {
+            "term": "full",
+            "coefficient": -13.627887032013167
+          },
+          {
+            "term": "full ou",
+            "coefficient": -8.804379863745023
+          },
+          {
+            "term": "normal",
+            "coefficient": -7.900486478031257
+          },
+          {
+            "term": "eye normal",
+            "coefficient": -6.931488531191119
+          },
+          {
+            "term": "with no",
+            "coefficient": -6.3663763292984274
+          },
+          {
+            "term": "no diagnosis",
+            "coefficient": -5.863848597828127
+          },
+          {
+            "term": "date_time full",
+            "coefficient": -5.7650718148908995
+          },
+          {
+            "term": "normal hvf",
+            "coefficient": -5.227194172536
+          },
+          {
+            "term": "oct",
+            "coefficient": -4.927021253759281
+          },
+          {
+            "term": "diagnosis of",
+            "coefficient": -4.834004471225997
+          },
+          {
+            "term": "mild",
+            "coefficient": -4.618925210773198
+          },
+          {
+            "term": "hvf full",
+            "coefficient": -4.452212576091423
+          },
+          {
+            "term": "and oct",
+            "coefficient": -4.343827409564578
+          },
+          {
+            "term": "no",
+            "coefficient": -4.2951116523394575
+          },
+          {
+            "term": "eye full",
+            "coefficient": -4.257198733622875
+          },
+          {
+            "term": "wnl",
+            "coefficient": -4.134570101436498
+          },
+          {
+            "term": "suspect",
+            "coefficient": -4.1138105372610845
+          },
+          {
+            "term": "diagnosis",
+            "coefficient": -3.877307646289892
+          },
+          {
+            "term": "of glaucoma",
+            "coefficient": -3.806097837530339
+          },
+          {
+            "term": "elevated",
+            "coefficient": -3.8023387400186084
+          },
+          {
+            "term": "oct and",
+            "coefficient": -3.793703171254318
+          },
+          {
+            "term": "glaucoma suspect",
+            "coefficient": -3.6667547607383733
+          },
+          {
+            "term": "normal visual",
+            "coefficient": -3.579562186669583
+          },
+          {
+            "term": "hvf and",
+            "coefficient": -3.4566440056691343
+          },
+          {
+            "term": "os full",
+            "coefficient": -3.4520786114695046
+          },
+          {
+            "term": "family",
+            "coefficient": -3.3500577214077296
+          },
+          {
+            "term": "eyes as",
+            "coefficient": -3.346036097090543
+          },
+          {
+            "term": "female with",
+            "coefficient": -3.340593169472637
+          },
+          {
+            "term": "asymmetry",
+            "coefficient": -3.283729067198061
+          },
+          {
+            "term": "person was",
+            "coefficient": -3.2065988010000543
+          }
+        ]
+      },
+      "top_direct_diagnosis_terms": [
+        {
+          "direction": "positive",
+          "term": "with glaucoma",
+          "coefficient": 3.520113875597271
+        },
+        {
+          "direction": "negative",
+          "term": "diagnosis of",
+          "coefficient": -4.834004471225997
+        },
+        {
+          "direction": "negative",
+          "term": "of glaucoma",
+          "coefficient": -3.806097837530339
+        },
+        {
+          "direction": "negative",
+          "term": "glaucoma suspect",
+          "coefficient": -3.6667547607383733
+        }
+      ],
+      "diagnosis_term_definition": "TF-IDF features containing glaucoma/glaucomatous, or the direct diagnosis fragments diagnosed/diagnosis with/of.",
+      "validation_auc_without_diagnosis_terms": 0.8731989974937343,
+      "diagnosis_vocabulary_terms_removed": 498
+    }
+  },
+  "test_auc": {
+    "gpt4_summary": 0.7872045021011072,
+    "note": 0.8654001006290817
+  },
+  "test_evaluation": {
+    "performed_once_after_C_selection": true,
+    "models_fit_on": "TRAIN only"
+  }
+}

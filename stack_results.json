@@ -1,0 +1,156 @@
+{
+  "config": {
+    "split_sizes": {
+      "train": 7000,
+      "val": 1000,
+      "test": 2000
+    },
+    "folds": 5,
+    "mlp_seeds": [
+      0,
+      100,
+      200,
+      300,
+      400
+    ],
+    "mlp_epochs": 30,
+    "batch_size": 128,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "scheduler": "CosineAnnealingLR",
+    "head": "Linear(d,256)-LayerNorm-GELU-Dropout(0.2)-Linear(256,2)",
+    "cv": "StratifiedKFold(shuffle=True, random_state=0), train rows only",
+    "text_fields": [
+      "gpt4_summary",
+      "note"
+    ],
+    "text_race_words_removed": [
+      "asian(?:[\\s-]+american)?",
+      "black",
+      "white",
+      "caucasian",
+      "african(?:[\\s-]+american)?",
+      "hispanic",
+      "latino",
+      "latina",
+      "latinx",
+      "indigenous",
+      "native[\\s-]+american",
+      "race",
+      "racial",
+      "ethnic\\w*"
+    ],
+    "text_vectorizer": {
+      "ngram_range": [
+        1,
+        2
+      ],
+      "min_df": 3,
+      "max_features": 50000,
+      "C": 1.0,
+      "race_words_removed_in_preprocessor": true
+    },
+    "meta_model": "LogisticRegression(lbfgs), fit on OOF probabilities",
+    "meta_C_values": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "meta_C_selection": "highest validation AUC; ties favor smaller C",
+    "decision_threshold": "validation Youden J; ties nearest 0.5",
+    "test_evaluation_after_validation_selection": true,
+    "test_probabilities_file": "stack_test_probs.npy",
+    "base_test_probabilities_file": "stack_base_test_probs.npz",
+    "image_variants": [],
+    "skipped_image_variant_caches": [
+      "cached_features_OLD_blackimages.pt: excluded legacy/non-variant cache"
+    ]
+  },
+  "base_models": {
+    "openclip_joint": {
+      "feature_config": "OpenCLIP img + OpenCLIP txt",
+      "training_protocol": "five-fold stratified OOF; 5-seed ensemble per fold; 5-seed full-TRAIN ensemble",
+      "validation": {
+        "auc": 0.8297864661654136,
+        "accuracy_at_0_5": 0.745,
+        "accuracy_at_val_youden": 0.741
+      },
+      "test": {
+        "auc": 0.8061489770543687,
+        "accuracy_at_0_5": 0.727,
+        "accuracy_at_val_youden": 0.726
+      }
+    },
+    "biomedclip_joint": {
+      "feature_config": "BiomedCLIP img + BiomedCLIP txt",
+      "training_protocol": "five-fold stratified OOF; 5-seed ensemble per fold; 5-seed full-TRAIN ensemble",
+      "validation": {
+        "auc": 0.8048040100250626,
+        "accuracy_at_0_5": 0.734,
+        "accuracy_at_val_youden": 0.73
+      },
+      "test": {
+        "auc": 0.7732524699638195,
+        "accuracy_at_0_5": 0.701,
+        "accuracy_at_val_youden": 0.701
+      }
+    },
+    "text_tfidf": {
+      "feature_config": "race-word-filtered TF-IDF of gpt4_summary + note",
+      "training_protocol": "five-fold stratified OOF; fixed C=1.0 logistic regression",
+      "validation": {
+        "auc": 0.8750275689223058,
+        "accuracy_at_0_5": 0.791,
+        "accuracy_at_val_youden": 0.79
+      },
+      "test": {
+        "auc": 0.8550241019654681,
+        "accuracy_at_0_5": 0.7615,
+        "accuracy_at_val_youden": 0.762
+      }
+    },
+    "stack": {
+      "feature_config": "logistic regression over 3 base OOF probabilities",
+      "selected_meta_C": 1.0,
+      "validation_C_sweep": [
+        {
+          "C": 0.01,
+          "val_auc": 0.8805092731829575
+        },
+        {
+          "C": 0.1,
+          "val_auc": 0.8908070175438596
+        },
+        {
+          "C": 1.0,
+          "val_auc": 0.8915889724310777
+        },
+        {
+          "C": 10.0,
+          "val_auc": 0.891528822055138
+        },
+        {
+          "C": 100.0,
+          "val_auc": 0.8915448621553884
+        }
+      ],
+      "validation_threshold": {
+        "rule": "Youden J maximized on validation; ties nearest 0.5",
+        "value": 0.4933918716842781
+      },
+      "validation": {
+        "auc": 0.8915889724310777,
+        "accuracy_at_0_5": 0.805,
+        "accuracy_at_val_youden": 0.808
+      },
+      "test": {
+        "auc": 0.8683189441748665,
+        "accuracy_at_0_5": 0.775,
+        "accuracy_at_val_youden": 0.775
+      }
+    }
+  }
+}

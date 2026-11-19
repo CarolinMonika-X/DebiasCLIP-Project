@@ -1,0 +1,111 @@
+{
+  "selection_metric": "validation ROC AUC",
+  "selection_rule": "Highest validation AUC; ties favor earlier listed variant.",
+  "training_split_size": 7000,
+  "validation_split_size": 1000,
+  "test_split_used": false,
+  "text_fields": [
+    "gpt4_summary",
+    "note"
+  ],
+  "preprocessing": {
+    "race_word_regex": "\\b(?:asian(?:[\\s-]+american)?|black|white|caucasian|african(?:[\\s-]+american)?|hispanic|latino|latina|latinx|indigenous|native[\\s-]+american|race|racial|ethnic\\w*)\\b",
+    "lowercase": true,
+    "ngram_range": [
+      1,
+      2
+    ],
+    "min_df": 3,
+    "max_features": 50000
+  },
+  "logistic_regression_c_values": [
+    0.3,
+    1.0,
+    3.0,
+    10.0
+  ],
+  "variants": [
+    {
+      "name": "logistic_regression_concatenated_C_0.3",
+      "model": "LogisticRegression",
+      "feature_view": "concatenated",
+      "C": 0.3,
+      "validation_auc": 0.8592601503759398
+    },
+    {
+      "name": "logistic_regression_concatenated_C_1",
+      "model": "LogisticRegression",
+      "feature_view": "concatenated",
+      "C": 1.0,
+      "validation_auc": 0.8750275689223058
+    },
+    {
+      "name": "logistic_regression_concatenated_C_3",
+      "model": "LogisticRegression",
+      "feature_view": "concatenated",
+      "C": 3.0,
+      "validation_auc": 0.8807739348370927
+    },
+    {
+      "name": "logistic_regression_concatenated_C_10",
+      "model": "LogisticRegression",
+      "feature_view": "concatenated",
+      "C": 10.0,
+      "validation_auc": 0.8791538847117796
+    },
+    {
+      "name": "calibrated_linear_svc_concatenated",
+      "model": "CalibratedClassifierCV(LinearSVC)",
+      "feature_view": "concatenated",
+      "C": 1.0,
+      "calibration": {
+        "method": "sigmoid",
+        "folds": 5,
+        "selection_data": "TRAIN only"
+      },
+      "validation_auc": 0.878015037593985
+    },
+    {
+      "name": "logistic_regression_separate_fields_C_0.3",
+      "model": "LogisticRegression",
+      "feature_view": "separate_fields",
+      "C": 0.3,
+      "validation_auc": 0.8624
+    },
+    {
+      "name": "logistic_regression_separate_fields_C_1",
+      "model": "LogisticRegression",
+      "feature_view": "separate_fields",
+      "C": 1.0,
+      "validation_auc": 0.8738045112781954
+    },
+    {
+      "name": "logistic_regression_separate_fields_C_3",
+      "model": "LogisticRegression",
+      "feature_view": "separate_fields",
+      "C": 3.0,
+      "validation_auc": 0.874742857142857
+    },
+    {
+      "name": "logistic_regression_separate_fields_C_10",
+      "model": "LogisticRegression",
+      "feature_view": "separate_fields",
+      "C": 10.0,
+      "validation_auc": 0.8709573934837092
+    },
+    {
+      "name": "calibrated_linear_svc_separate_fields",
+      "model": "CalibratedClassifierCV(LinearSVC)",
+      "feature_view": "separate_fields",
+      "C": 1.0,
+      "calibration": {
+        "method": "sigmoid",
+        "folds": 5,
+        "selection_data": "TRAIN only"
+      },
+      "validation_auc": 0.869032581453634
+    }
+  ],
+  "selected_variant": "logistic_regression_concatenated_C_3",
+  "selected_validation_auc": 0.8807739348370927
+}
